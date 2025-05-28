@@ -1,0 +1,190 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+body {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+}
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+
+/* 탭 메뉴 스타일 */
+.tab-menu {
+  display: flex;
+  justify-content: flex-start;
+  align-items: left;
+  gap: 30px;
+  /* border-bottom: 1px solid #ddd; */
+  margin-bottom: 30px;
+  text-align: left;
+  width: 100%; /* ← 이거 중요 */
+}
+
+
+.tab-button {
+  background: none;
+  border: none;
+  padding: 10px 0;
+  font-size: 16px;
+  cursor: pointer;
+  color: #666;
+  position: relative;
+}
+
+.tab-button.active {
+  color: #2563eb; /* 파란 강조 색 */
+  font-weight: bold;
+}
+
+.tab-button.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #2563eb;
+}
+
+.title {
+  display: block;
+  width: 100%;
+  text-align: left !important;
+  margin: 0;
+}
+
+.cards {
+  display: flex;
+  gap: 40px;
+}
+
+.practice-card {
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 10px;
+  background-color: #fff;
+  width: 400px;
+
+}
+
+.practice-card-title {
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+
+.practice-card-list {
+  list-style: disc;
+  padding-left: 20px;
+  margin-bottom: 16px;
+  font-size: 12px;
+  color: #000000;
+}
+.practice-card-contents {
+  list-style: disc;
+  padding-left: 4px;
+  padding-bottom: 5px;
+  font-size: 14px;
+  color: #444;
+}
+
+.hrline, .hrline-title {
+  border: none;
+  border-top: 1px solid #E2E2E2;
+  height: 0;
+  width: 100%;
+  margin: 10px auto; /* ✅ 가운데 정렬 핵심 */
+}
+
+
+
+.info-box {
+  background-color: #ffffff;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+.info-header {
+  display: flex;
+  align-items: center; /* 이미지와 텍스트를 세로로 중앙 정렬 */
+  justify-content: center; /* 이미지와 텍스트를 가로로 중앙에 배치 */
+  margin-bottom: 15px; /* 제목과 내용 간의 간격 */
+}
+
+.img {
+  width: 40px; /* 이미지 크기 조정 */
+  height: auto;
+  margin-right: 10px; /* 이미지와 텍스트 간의 간격 */
+}
+
+.info-title {
+  font-size: 15px;
+  font-weight: bold;
+  margin: 0; /* p 태그의 기본 margin 제거 */
+  text-align: center; /* 텍스트를 중앙 정렬 */
+}
+.radio-group {
+   display: flex;
+  justify-content: center; /* 가로 가운데 정렬 */
+  align-items: center;      /* 세로 가운데 정렬 (필요한 경우) */
+  gap: 20px;                /* 버튼 사이 간격 */
+  margin-top: 35px;
+  margin-bottom: 15px;
+}
+
+.self-practice {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.self-text {
+  margin-left: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.self-img {
+  width: 40px;
+  height: 40px;
+}
+
+.self-text-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.self-title {
+  font-size: 15px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.self-contents {
+  font-size: 13px;
+  margin: 2px 0 0 0;
+  margin-bottom: 10px;
+}
+
+.button {
+  width: 100%;
+  padding: 10px;
+  background-color: #6482ED;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+  margin-bottom: 20px;
+}
+
+.self-practice {
+  margin-bottom: 16px;
+}

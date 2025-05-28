@@ -1,0 +1,168 @@
+.feedback-wrapper {
+  width: 720px;
+  width: 80%;
+  margin: 0 auto;
+  padding: 0.5rem 0.5rem; /* 위 아래 패딩 줄임 */
+}
+
+.box-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  padding: 1rem; /* 패딩 줄임 */
+  gap: 0.5rem; /* 간격 축소 */
+}
+
+.interview-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; /* 간격 축소 */
+}
+
+.interview-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.15rem; /* 여백 축소 */
+  font-size: 0.9rem; /* 글자 크기 약간 줄임 */
+}
+
+.interview-header img {
+  width: 16px;
+  height: 16px;
+  margin-right: 4px;
+}
+
+.video-box {
+  border-radius: 6px;
+  overflow: hidden;
+  background-color: #f8f8f8;
+}
+
+.feedback-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: none;
+}
+
+.feedback-box {
+  flex: 1;
+  border-left: 1px solid #F1F1F1;
+  padding-left: 0.75rem; /* 왼쪽 여백 줄임 */
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; /* 내부 간격 줄임 */
+}
+
+.box-title {
+  font-size: 1rem; 
+  font-weight: 600;
+}
+
+.feedback-item {
+  margin: 0; 
+}
+
+.feedback-heading {
+  font-weight: 600;
+  margin-bottom: 0.15rem;
+  font-size: 0.9rem;
+}
+
+.feedback-text {
+  background-color: #f5f5f5;
+  padding: 3px; /* 패딩 축소 */
+  font-size: 0.85rem; /* 글자 크기 축소 */
+  border-radius: 6px;
+  line-height: 1.3; /* 줄 간격 줄임 */
+}
+
+.feedback-hr {
+  width: 100%;
+  background: #E2E2E2;
+}
+
+.exit-button {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: #638eff;
+  color: white;
+  padding: 5px 12px; /* 크기 소폭 축소 */
+  border: none;
+  border-radius: 9999px;
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.exit-button:hover {
+  background-color: #4a75e5;
+}
+
+.hrline {
+  background: #E2E2E2;
+  height: 1px;
+  border: 0;
+  margin: 3px 0;
+}
+
+.header-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  position: relative;
+  background-color: white;
+}
+
+.title-box {
+  display: flex;
+  align-items: center;
+}
+
+.gray-box {
+  width: 130px;
+  height: 26px;
+  background-color: #d3d3d3;
+  margin-right: 5px;
+}
+
+.title-text {
+  color: #333;
+  font-size: 12.5px;
+}
+
+.recheck-msg {
+  margin-top: 5px;
+  font-size: 12.5px;
+  color: #666;
+  text-align: center;
+}
+
+.recheck-msg a {
+  color: #3f51b5;
+  text-decoration: underline;
+}
+
+.button-group {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-right: 120px;
+}
+
+.btn {
+  padding: 5px 18px;
+  font-size: 12.5px;
+  border-radius: 6px;
+  background-color: #6482ED;
+  color: white;
+  border: none;
+  cursor: pointer;
+}

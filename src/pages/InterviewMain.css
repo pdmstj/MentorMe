@@ -1,0 +1,76 @@
+.main-container {
+  padding: 40px;
+  max-width: 1000px;
+  margin: 50px auto;
+}
+
+/* 면접 보러 가기 */
+.go-interview-box {
+  background-color: #7188f0;
+  border-radius: 20px;
+  padding: 30px;
+  height: 200px;
+  display: flex;
+  align-items: flex-end;
+  margin-bottom: 20px;
+  cursor: pointer;
+}
+
+.go-interview-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  width: 100%;
+}
+
+.go-interview-text {
+  color: white;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.character-image {
+  width: 160px;
+  height: auto;
+}
+
+/* 카드 컨테이너 */
+.card-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+/* 카드 각각의 크기 및 위치 */
+.card {
+  flex: 1;
+  max-width: 48%;
+  position: relative;
+  background-color: white;
+  border-radius: 15px;
+  padding: 20px;
+  height: 180px; /* 면접보러가기의 반 높이 정도 */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* 이미지 오른쪽 위 */
+.card-image {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 120px;
+  height: auto;
+}
+
+/* 타이틀 왼쪽 아래 */
+.card-title {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  font-weight: bold;
+  font-size: 16px;
+}
+.character-image {
+  width: 200px; /* 기존보다 크게 */
+  height: auto;
+}
