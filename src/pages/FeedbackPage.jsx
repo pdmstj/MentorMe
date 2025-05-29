@@ -1,6 +1,7 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import '../pages/FeedbackPage.css';
+import logoImg from "../image/mentorme_logo.png";
 
 const feedbackData = {
   title: 'AI 분석 기반 피드백',
@@ -29,7 +30,9 @@ const FeedbackPage = () => {
     <>
     <div className="header-container">
         <div className="title-box">
-          <div className="gray-box"></div>
+          <div className="title-logo">
+            <img src={logoImg} alt="로고" className='logo-img'/>
+          </div>
           <span className="title-text">피드백 확인</span>
         </div>
         <button className="exit-button" onClick={() => navigate('/interview-practice')}>나가기</button>

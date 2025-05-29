@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import '../pages/ConversationPracticePage.css';
 import frame34 from "../image/Frame 34.svg";
 import ai_men from "../image/aimento.png";
+import logoImg from "../image/mentorme_logo.png";
 
 const questions = [
   { tag: '문제해결 역량', text: '과제나 프로젝트를 수행하는 과정에서 문제가 발생하여 해결했던 경험에 대해 이야기해주세요.' },
@@ -99,7 +100,9 @@ const ConversationPracticePage = () => {
     <>
       <div className="header-container">
         <div className="title-box">
-          <div className="gray-box"></div>
+          <div className="title-logo">
+            <img src={logoImg} alt="로고" className='logo-img'/>
+          </div>
           <span className="title-text">대화형 실전 면접</span>
         </div>
         <button className="exit-button" onClick={() => navigate('/')}>나가기</button>

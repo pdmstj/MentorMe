@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from 'react-router-dom';
 import "../pages/MicCameraCheck.css";
 import frame34 from "../image/Frame 34.svg";
+import logoImg from "../image/mentorme_logo.png";
 
 function MicCameraCheck() {
   const navigate = useNavigate();
@@ -64,7 +65,9 @@ function MicCameraCheck() {
     <>
       <div className="header-container">
         <div className="title-box">
-          <div className="gray-box"></div>
+          <div className="title-logo">
+            <img src={logoImg} alt="로고" className='logo-img'/>
+          </div>
           <span className="title-text">마이크 카메라 확인</span>
         </div>
         <button className="exit-button" onClick={() => navigate('/interview-practice')}>나가기</button>

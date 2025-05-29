@@ -7,10 +7,15 @@
 }
 
 .logo {
+  margin-top: 5px;
   width: 100px;
   height: 30px;
-  background-color: #d1d5db; /* 회색 박스 (이미지 대체) */
-  border-radius: 6px;
+}
+
+.logo-img {
+  height: 25px; 
+  width: auto;
+  object-fit: contain;
 }
 
 .nav-menu {

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../pages/SelfInterviewPractice.css';
 import frame34 from "../image/Frame 34.svg";
+import logoImg from "../image/mentorme_logo.png";
 
 const questions = [
   { tag: '문제해결 역량', text: '과제나 프로젝트를 수행하는 과정에서 문제가 발생하여 해결했던 경험에 대해 이야기해주세요.' },
@@ -18,9 +19,16 @@ const SelfInterviewPractice = () => {
   const [mediaStream, setMediaStream] = useState(null);
   const [recording, setRecording] = useState(false);
   const [recordedBlob, setRecordedBlob] = useState(null);
-  const [time, setTime] = useState(0);
-  const [selectedQuestionIndex, setSelectedQuestionIndex] = useState(0);
-  const [showDropdown, setShowDropdown] = useState(false);
+  const [questionIndex, setQuestionIndex] = useState(0);
+  const [recordingTime, setRecordingTime] = useState(0);
+  
+    // 질문 자동 전환
+    useEffect(() => {
+      const timer = setInterval(() => {
+        setQuestionIndex((prev) => (prev + 1) % questions.length);
+      }, 30000);
+      return () => clearInterval(timer);
+    }, []);
 
   useEffect(() => {
     const startCameraAndRecording = async () => {
@@ -63,18 +71,19 @@ const SelfInterviewPractice = () => {
   }, []);
 
   useEffect(() => {
-    if (!recording) return;
-    const timer = setInterval(() => {
-      setTime((prev) => prev + 1);
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [recording]);
+  if (!recording) return;
+  const timer = setInterval(() => {
+    setRecordingTime((prev) => prev + 1);
+  }, 1000);
+  return () => clearInterval(timer);
+}, [recording]);
 
-  const formatTime = (s) => {
-    const m = String(Math.floor(s / 60)).padStart(2, '0');
-    const sec = String(s % 60).padStart(2, '0');
-    return `${m}:${sec}`;
-  };
+const formatTime = (s) => {
+  const m = String(Math.floor(s / 60)).padStart(2, '0');
+  const sec = String(s % 60).padStart(2, '0');
+  return `${m}:${sec}`;
+};
+
 
   const goToFeedback = () => {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
@@ -92,7 +101,9 @@ const SelfInterviewPractice = () => {
     <>
       <div className="header-container">
         <div className="title-box">
-          <div className="gray-box"></div>
+          <div className="title-logo">
+            <img src={logoImg} alt="로고" className='logo-img'/>
+          </div>
           <span className="title-text">대화형 실전 면접</span>
         </div>
         <button className="exit-button" onClick={() => navigate('/')}>나가기</button>
@@ -102,32 +113,14 @@ const SelfInterviewPractice = () => {
         <div className="question-container">
           <img className="img" alt="Frame" src={frame34} />
           <div className="question-section">
-            <div className="dropdown-header" onClick={() => setShowDropdown(!showDropdown)}>
-              {questions[selectedQuestionIndex].tag}
-              <span className="arrow">{showDropdown ? '▲' : '▼'}</span>
-            </div>
-            {showDropdown && (
-              <ul className="dropdown-list">
-                {questions.map((q, idx) => (
-                  <li
-                    key={idx}
-                    onClick={() => {
-                      setSelectedQuestionIndex(idx);
-                      setShowDropdown(false);
-                    }}
-                  >
-                    {q.tag}
-                  </li>
-                ))}
-              </ul>
-            )}
-            <div className="question-text">{questions[selectedQuestionIndex].text}</div>
+            <span className="question-tag">🧠 {questions[questionIndex].tag}</span>
+            <p className="question-text">{questions[questionIndex].text}</p>
           </div>
         </div>
 
         <video ref={videoRef} autoPlay muted playsInline className="user-webcam" />
         <div className="control-bar">
-          <span className="recording-text">녹화중 {formatTime(time)}</span>
+          <span className="recording-text">녹화중 {formatTime(recordingTime)}</span>
           <button className="pause-button" disabled>일시정지</button>
           <div className="waveform">
             <div className="bar" />
