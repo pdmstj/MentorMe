@@ -2,6 +2,7 @@ import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import '../pages/FeedbackPage.css';
 import logoImg from "../image/mentorme_logo.png";
+import feedbackImg from "../image/feedback.png";
 
 const feedbackData = {
   title: 'AI 분석 기반 피드백',
@@ -43,7 +44,7 @@ const FeedbackPage = () => {
         <div className="box-container">
           <div className="interview-section">
             <div className="interview-header">
-              <img src="/icon.svg" alt="icon" />
+              <img src={feedbackImg} alt="icon" />
               <span><strong>김미림</strong> 님의 면접 내용</span>
             </div>
             <div className="video-box">
