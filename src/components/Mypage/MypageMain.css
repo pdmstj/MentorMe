@@ -1,0 +1,211 @@
+.mypage-container {
+  padding: 20px;
+  font-family: 'Pretendard', sans-serif;
+}
+
+.mypage-menu {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 20px;
+}
+
+.menu-item {
+  font-size: 20px;
+  font-weight: 500;
+  color: #888;
+  cursor: pointer;
+}
+
+.menu-item.active {
+  color: #111;
+  font-weight: bold;
+}
+
+.mypage-content {
+  display: flex;
+  gap: 30px;
+}
+
+/* 왼쪽 사이드바 */
+.mypage-sidebar {
+  background-color: #6482ed;
+  padding: 20px;
+  border-radius: 10px;
+  color: white;
+  width: 220px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.recommend-msg {
+  font-size: 12px;
+  text-decoration: underline;
+  margin-bottom: 20px;
+  display: inline-block;
+}
+
+.sidebar-buttons button {
+  width: 100%;
+  margin-bottom: 8px;
+  padding: 12px;
+  border-radius: 8px;
+  background-color: white;
+  color: black;
+  border: none;
+  font-size: 14px;
+  text-align: left;
+}
+
+.required {
+  color: red;
+  margin-left: 4px;
+}
+
+/* 오른쪽 본문 */
+.mypage-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+/* 추천 섹션 */
+.recommend-section {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.recommend-detail {
+  margin-left: 20px;
+  text-decoration: underline;
+  font-size: 12px;
+  background: none;
+  border: none;
+  color: black;
+  cursor: pointer;
+}
+
+.toggle-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 토글 스위치 */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 34px;
+  height: 20px;
+}
+
+.switch input { display: none; }
+
+.slider {
+  position: absolute;
+  top: 0; left: 0;
+  right: 0; bottom: 0;
+  background-color: #ccc;
+  border-radius: 34px;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #6482ed;
+}
+
+input:checked + .slider:before {
+  transform: translateX(14px);
+}
+
+.toggle-text {
+  font-size: 14px;
+}
+
+/* 프로필 섹션 */
+.profile-section {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 10px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.profile-info {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.profile-img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: #ddd;
+}
+
+.profile-text div {
+  margin-bottom: 5px;
+}
+
+/* 최근 면접 섹션 */
+.interview-section {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.interview-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.interview-cards {
+  display: flex;
+  gap: 20px;
+}
+
+.card {
+  width: 150px;
+  height: 100px;
+  background-color: #eee;
+  border-radius: 8px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 10px;
+  font-size: 14px;
+}
+
+.plus-btn {
+  border: none;
+  background: none;
+  font-size: 24px;
+  cursor: pointer;
+}
