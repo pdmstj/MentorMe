@@ -23,6 +23,26 @@ const ConversationPracticePage = () => {
   const [recordingTime, setRecordingTime] = useState(0);
   const navigate = useNavigate();
 
+  // 🟢 Whisper 서버에 업로드하는 함수
+  const uploadToWhisper = async (blob) => {
+    const formData = new FormData();
+    formData.append("file", blob, "audio.wav");
+
+    try {
+      const response = await fetch('http://localhost:8000/stt/', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+      console.log('STT 결과:', data.text);
+      return data.text;
+    } catch (error) {
+      console.error('STT 업로드 실패:', error);
+      return null;
+    }
+  };
+
   // 질문 자동 전환
   useEffect(() => {
     const timer = setInterval(() => {
@@ -49,12 +69,16 @@ const ConversationPracticePage = () => {
           }
         };
 
-        mediaRecorder.onstop = () => {
-          const blob = new Blob(chunksRef.current, { type: 'video/webm' });
+        // 녹화 종료 -> Whisper 서버로 전송
+        mediaRecorder.onstop = async () => {
+          const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
           setRecordedBlob(blob);
           stream.getTracks().forEach(track => track.stop());
+
+          const sttText = await uploadToWhisper(blob); // 🔥 STT 텍스트 받아오기
           const videoUrl = URL.createObjectURL(blob);
-          navigate('/feedback', { state: { videoUrl } });
+
+          navigate('/feedback', { state: { videoUrl, sttText } }); // ➔ 피드백 페이지로 전달
         };
 
         mediaRecorder.start();
@@ -86,7 +110,7 @@ const ConversationPracticePage = () => {
 
   const handleFeedbackClick = () => {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-      mediaRecorderRef.current.stop(); // onstop에서 navigate 처리됨
+      mediaRecorderRef.current.stop(); // onstop에서 서버 전송 후 이동
       setRecording(false);
     } else if (recordedBlob) {
       const videoUrl = URL.createObjectURL(recordedBlob);
