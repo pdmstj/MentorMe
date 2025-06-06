@@ -21,12 +21,12 @@ const ConversationPracticePage = () => {
   const [recordedBlob, setRecordedBlob] = useState(null);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [recordingTime, setRecordingTime] = useState(0);
+  const [loading, setLoading] = useState(false); // ✅ 로딩 상태 추가
   const navigate = useNavigate();
 
-  // 🟢 Whisper 서버에 업로드하는 함수
   const uploadToWhisper = async (blob) => {
     const formData = new FormData();
-    formData.append("file", blob, "audio.wav");
+    formData.append("file", blob, "audio.webm");
 
     try {
       const response = await fetch('http://localhost:8000/stt/', {
@@ -43,7 +43,6 @@ const ConversationPracticePage = () => {
     }
   };
 
-  // 질문 자동 전환
   useEffect(() => {
     const timer = setInterval(() => {
       setQuestionIndex((prev) => (prev + 1) % questions.length);
@@ -51,7 +50,6 @@ const ConversationPracticePage = () => {
     return () => clearInterval(timer);
   }, []);
 
-  // 자동 녹화 시작
   useEffect(() => {
     const startAutoRecording = async () => {
       try {
@@ -69,16 +67,22 @@ const ConversationPracticePage = () => {
           }
         };
 
-        // 녹화 종료 -> Whisper 서버로 전송
         mediaRecorder.onstop = async () => {
+          setLoading(true); // ✅ 녹화 중단 시 로딩 true
           const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
           setRecordedBlob(blob);
           stream.getTracks().forEach(track => track.stop());
 
-          const sttText = await uploadToWhisper(blob); // 🔥 STT 텍스트 받아오기
+          const sttText = await uploadToWhisper(blob);
           const videoUrl = URL.createObjectURL(blob);
 
-          navigate('/feedback', { state: { videoUrl, sttText } }); // ➔ 피드백 페이지로 전달
+          navigate('/feedback', {
+            state: {
+              videoUrl,
+              sttText: sttText || "",
+              type: 'conversation',
+            }
+          });
         };
 
         mediaRecorder.start();
@@ -91,7 +95,6 @@ const ConversationPracticePage = () => {
     startAutoRecording();
   }, []);
 
-  // 녹화 타이머
   useEffect(() => {
     let interval;
     if (recording) {
@@ -110,11 +113,18 @@ const ConversationPracticePage = () => {
 
   const handleFeedbackClick = () => {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-      mediaRecorderRef.current.stop(); // onstop에서 서버 전송 후 이동
+      setLoading(true); // ✅ 버튼 눌렀을 때 로딩
+      mediaRecorderRef.current.stop();
       setRecording(false);
     } else if (recordedBlob) {
       const videoUrl = URL.createObjectURL(recordedBlob);
-      navigate('/feedback', { state: { videoUrl } });
+      navigate('/feedback', {
+        state: {
+          videoUrl,
+          sttText: "",
+          type: 'conversation'
+        }
+      });
     } else {
       alert('녹화된 영상이 없습니다.');
     }
@@ -122,51 +132,63 @@ const ConversationPracticePage = () => {
 
   return (
     <>
-      <div className="header-container">
-        <div className="title-box">
-          <div className="title-logo">
-            <img src={logoImg} alt="로고" className='logo-img'/>
-          </div>
-          <span className="title-text">대화형 실전 면접</span>
+     {loading && ( // ✅ 로딩 오버레이
+        <div className="loading-overlay">
+          <div className="spinner" />
+          <p>🌀 분석 중입니다. 잠시만 기다려주세요...</p>
+          분석 시간이 많이 지연될 수도 있습니다 !
         </div>
-        <button className="exit-button" onClick={() => navigate('/')}>나가기</button>
-      </div>
-      <hr className='hrline' />
-      <div className="interview-container">
-        <div className="question-container">
-          <img className="img" alt="Frame" src={frame34} />
-          <div className="question-section">
-            <span className="question-tag">🧠 {questions[questionIndex].tag}</span>
-            <p className="question-text">{questions[questionIndex].text}</p>
-          </div>
-        </div>
+      )}
 
-        <div className="interview-video-section">
-          <div className="ai-interviewer">
-            <p>AI 면접관 화면</p>
-            <img src={ai_men} alt="AI 면접관" className="face-image" />
-          </div>
-
-          <div className="user-camera">
-            <p>나의 화면</p>
-            <video ref={videoRef} autoPlay muted className="video-preview" />
-
-            {recording && (
-              <div className="recording-bar">
-                <div className="recording-indicator">🔴 녹화중 {formatTime(recordingTime)}</div>
-                <div className="waveform">
-                  <div className="bar"></div>
-                  <div className="bar"></div>
-                  <div className="bar"></div>
-                  <div className="bar"></div>
-                  <div className="bar"></div>
-                </div>
-                <button className="feedback-button" onClick={handleFeedbackClick}>피드백 보러가기</button>
+      {!loading && ( // ✅ 로딩 아닐 때만 원래 화면
+        <>
+          <div className="header-container">
+            <div className="title-box">
+              <div className="title-logo">
+                <img src={logoImg} alt="로고" className="logo-img" />
               </div>
-            )}
+              <span className="title-text">대화형 실전 면접</span>
+            </div>
+            <button className="exit-button" onClick={() => navigate('/')}>나가기</button>
           </div>
-        </div>
-      </div>
+          <hr className="hrline" />
+          <div className="interview-container">
+            <div className="question-container">
+              <img className="img" alt="Frame" src={frame34} />
+              <div className="question-section">
+                <span className="question-tag">🧠 {questions[questionIndex].tag}</span>
+                <p className="question-text">{questions[questionIndex].text}</p>
+              </div>
+            </div>
+
+            <div className="interview-video-section">
+              <div className="ai-interviewer">
+                <p>AI 면접관 화면</p>
+                <img src={ai_men} alt="AI 면접관" className="face-image" />
+              </div>
+
+              <div className="user-camera">
+                <p>나의 화면</p>
+                <video ref={videoRef} autoPlay muted className="video-preview" />
+
+                {recording && (
+                  <div className="recording-bar">
+                    <div className="recording-indicator">🔴 녹화중 {formatTime(recordingTime)}</div>
+                    <div className="waveform">
+                      <div className="bar"></div>
+                      <div className="bar"></div>
+                      <div className="bar"></div>
+                      <div className="bar"></div>
+                      <div className="bar"></div>
+                    </div>
+                    <button className="feedback-button" onClick={handleFeedbackClick}>피드백 보러가기</button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 };
