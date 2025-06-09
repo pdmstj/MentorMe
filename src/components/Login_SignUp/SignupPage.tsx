@@ -2,8 +2,9 @@ import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { Container, Form, Input, Button, Title, Label, InputWrapper } from "./SignupPage_styles";
 import { UserContext } from "../../contexts/UserContext";
-import { db } from "../../firebase";
+import { db, auth } from "../../firebase";
 import { collection, addDoc } from "firebase/firestore";
+import { createUserWithEmailAndPassword } from "firebase/auth"; // auto 계정 생성
 
 function SignupPage() {
   const [formData, setFormData] = useState({
@@ -28,10 +29,14 @@ function SignupPage() {
     }
 
     try {
-      // ✅ Firestore에 저장
+      //  Firebase Auth에 계정 생성
+      const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+      const user = userCredential.user;
+
+      //  Firestore에 유저 정보 저장
       await addDoc(collection(db, "users"), {
+        uid: user.uid, // 유저 고유 UID
         id: formData.id,
-        password: formData.password, // ⚠️ 실제 서비스에서는 비밀번호 암호화 필요
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
@@ -39,12 +44,14 @@ function SignupPage() {
         createdAt: new Date(),
       });
 
+      //  Context에 로그인 처리
       login(formData.name, formData.email, formData.phone, formData.birth);
+
       alert("회원가입이 완료되었습니다!");
-      navigate('/');
-    } catch (error) {
-      console.error("Firestore 저장 오류:", error);
-      alert("회원가입 중 오류가 발생했습니다.");
+      navigate("/");
+    } catch (error: any) {
+      console.error("회원가입 오류:", error.message);
+      alert("회원가입 중 오류가 발생했습니다: " + error.message);
     }
   };
 
