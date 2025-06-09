@@ -1,5 +1,7 @@
-import React, {useRef} from "react";
+import React, { useRef, useEffect, useState } from "react";
 import Slider from "react-slick";
+import { auth, db } from "../../firebase";
+import { onAuthStateChanged, User } from "firebase/auth";
 import {
   Company,
   Container,
@@ -47,25 +49,40 @@ const sliderSettings = {
 };
 
 const Recommend: React.FC = () => {
-  const sliderRef = useRef<Slider>(null); // Slider 타입 ref
+  const sliderRef = useRef<Slider>(null);
+  const [userName, setUserName] = useState<string>("");
+
+  useEffect(() => {
+    // 로그인 상태 감지
+    const unsubscribe = onAuthStateChanged(auth, (user: User | null) => {
+      if (user) {
+        // displayName이 없으면 이메일에서 이름 추출하는 등 추가 처리 가능
+        setUserName(user.displayName || user.email?.split("@")[0] || "사용자");
+      } else {
+        setUserName("사용자");  // 비로그인 상태 시 기본값
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   return (
     <Container>
-      <Title>김미림 님에게 꼭 맞는 기업을 추천해드려요!</Title>
+      <Title>{userName} 님에게 꼭 맞는 기업을 추천해드려요!</Title>
       <ArrowButton
-          aria-label="이전"
-          onClick={() => sliderRef.current?.slickPrev()}
-          style={{ position: "absolute", top: "50%", left: "70px", zIndex: 20 }}
-        >
-          {"<"}
-        </ArrowButton>
-        <ArrowButton
-          aria-label="다음"
-          onClick={() => sliderRef.current?.slickNext()}
-          style={{ position: "absolute", top: "50%", right: "70px", zIndex: 20 }}
-        >
-          {">"}
-        </ArrowButton>
+        aria-label="이전"
+        onClick={() => sliderRef.current?.slickPrev()}
+        style={{ position: "absolute", top: "50%", left: "70px", zIndex: 20 }}
+      >
+        {"<"}
+      </ArrowButton>
+      <ArrowButton
+        aria-label="다음"
+        onClick={() => sliderRef.current?.slickNext()}
+        style={{ position: "absolute", top: "50%", right: "70px", zIndex: 20 }}
+      >
+        {">"}
+      </ArrowButton>
       <CardArea style={{ position: "relative" }}>
         <StyledSlider ref={sliderRef} {...sliderSettings}>
           {companies.map((company) => (
