@@ -1,7 +1,7 @@
 import React, { useState, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth, db } from "../../firebase.js"; // ← firebase.js에서 auth, db 가져옴
+import { auth, db } from "../../firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { Container, Form, Input, Button, Title, LinkSign, LinkSearch, LinkWrapper } from "./LoginPage_styles";
 import { UserContext } from "../../contexts/UserContext";
