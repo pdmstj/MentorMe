@@ -1,7 +1,9 @@
 import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { Container, Form, Input, Button, Title, Label, InputWrapper } from "./SignupPage_styles";
-import { UserContext } from "../../contexts/UserContext"; // ✅ UserContext 가져오기
+import { UserContext } from "../../contexts/UserContext";
+import { db } from "../../firebase";
+import { collection, addDoc } from "firebase/firestore";
 
 function SignupPage() {
   const [formData, setFormData] = useState({
@@ -10,14 +12,14 @@ function SignupPage() {
     confirmPassword: "",
     name: "",
     email: "",
-    phone: "",  // ✅ 추가
-    birth: "",  // ✅ 추가
+    phone: "",
+    birth: "",
   });
 
-  const { login } = useContext(UserContext); // ✅ login 함수
+  const { login } = useContext(UserContext);
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
@@ -25,22 +27,25 @@ function SignupPage() {
       return;
     }
 
-    // ✅ localStorage에 유저 정보 저장
-    const userData = {
-      id: formData.id,
-      password: formData.password,
-      name: formData.name,
-      email: formData.email,
-      phone: formData.phone,    // ✅ 저장
-      birth: formData.birth,    // ✅ 저장
-    };
-    localStorage.setItem('registeredUser', JSON.stringify(userData));
+    try {
+      // ✅ Firestore에 저장
+      await addDoc(collection(db, "users"), {
+        id: formData.id,
+        password: formData.password, // ⚠️ 실제 서비스에서는 비밀번호 암호화 필요
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        birth: formData.birth,
+        createdAt: new Date(),
+      });
 
-    // ✅ context에도 바로 로그인 (이름 + 이메일 + 전화번호 + 생일)
-    login(formData.name, formData.email, formData.phone, formData.birth); 
-
-    alert("회원가입이 완료되었습니다. 메인페이지로 이동합니다.");
-    navigate('/'); // 메인페이지로 이동
+      login(formData.name, formData.email, formData.phone, formData.birth);
+      alert("회원가입이 완료되었습니다!");
+      navigate('/');
+    } catch (error) {
+      console.error("Firestore 저장 오류:", error);
+      alert("회원가입 중 오류가 발생했습니다.");
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,92 +57,38 @@ function SignupPage() {
     <Container>
       <Title>회원가입</Title>
       <Form onSubmit={handleSubmit}>
+        {/* id */}
         <InputWrapper>
           <Label htmlFor="id">아이디</Label>
-          <Input
-            type="text"
-            id="id"
-            name="id"
-            placeholder="아이디"
-            value={formData.id}
-            onChange={handleChange}
-            required
-          />
+          <Input type="text" id="id" name="id" value={formData.id} onChange={handleChange} required />
         </InputWrapper>
 
+        {/* 비밀번호 */}
         <InputWrapper>
           <Label htmlFor="password">비밀번호</Label>
-          <Input
-            type="password"
-            id="password"
-            name="password"
-            placeholder="비밀번호"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
-          <Input
-            type="password"
-            id="confirmPassword"
-            name="confirmPassword"
-            placeholder="비밀번호 확인"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            required
-          />
+          <Input type="password" id="password" name="password" value={formData.password} onChange={handleChange} required />
+          <Input type="password" id="confirmPassword" name="confirmPassword" placeholder="비밀번호 확인" value={formData.confirmPassword} onChange={handleChange} required />
         </InputWrapper>
 
+        {/* 기타 항목 */}
         <InputWrapper>
           <Label htmlFor="name">이름</Label>
-          <Input
-            type="text"
-            id="name"
-            name="name"
-            placeholder="이름"
-            value={formData.name}
-            onChange={handleChange}
-            required
-          />
+          <Input type="text" id="name" name="name" value={formData.name} onChange={handleChange} required />
         </InputWrapper>
 
         <InputWrapper>
           <Label htmlFor="email">이메일</Label>
-          <Input
-            type="email"
-            id="email"
-            name="email"
-            placeholder="이메일"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
+          <Input type="email" id="email" name="email" value={formData.email} onChange={handleChange} required />
         </InputWrapper>
 
-        {/* ✅ 전화번호 입력 */}
         <InputWrapper>
           <Label htmlFor="phone">전화번호</Label>
-          <Input
-            type="text"
-            id="phone"
-            name="phone"
-            placeholder="전화번호"
-            value={formData.phone}
-            onChange={handleChange}
-            required
-          />
+          <Input type="text" id="phone" name="phone" value={formData.phone} onChange={handleChange} required />
         </InputWrapper>
 
-        {/* ✅ 생년월일 입력 */}
         <InputWrapper>
           <Label htmlFor="birth">생년월일</Label>
-          <Input
-            type="date"
-            id="birth"
-            name="birth"
-            value={formData.birth}
-            onChange={handleChange}
-            required
-          />
+          <Input type="date" id="birth" name="birth" value={formData.birth} onChange={handleChange} required />
         </InputWrapper>
 
         <Button type="submit">회원가입</Button>
