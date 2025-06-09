@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useContext, useEffect } from "react";
+import React, { useState, useMemo, useContext } from "react";
 import {
   Container,
   FixedImage,
@@ -136,9 +136,16 @@ const Mypage = () => {
     localStorage.setItem('licenses', JSON.stringify(updated));
   };
 
+  // 저장하기 버튼 클릭 시 전체 상태 저장 함수
+  const handleSave = () => {
+    localStorage.setItem('selectedJobs', JSON.stringify(selectedJobs));
+    localStorage.setItem('selectedSkills', JSON.stringify(selectedSkills));
+    localStorage.setItem('licenses', JSON.stringify(licenses));
+    alert("저장되었습니다!");
+  };
+
   return (
     <>
-      {/* 로고 클릭 시 메인으로 */}
       <Link to="/">
         <FixedImage
           src={logoImg}
@@ -326,9 +333,28 @@ const Mypage = () => {
           <AddLicenseButton>+ 수상내역 추가</AddLicenseButton>
         </Section>
 
+        {/* 저장하기 버튼 */}
+        <Section style={{ textAlign: "center", marginTop: "30px" }}>
+          <AddLicenseButton
+            onClick={handleSave}
+            style={{
+              backgroundColor: '#6482ED',
+              color: 'white',
+              padding: '12px 24px',
+              fontSize: '1rem',
+              borderRadius: '12px',
+              border: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            저장하기
+          </AddLicenseButton>
+        </Section>
+
       </Container>
     </>
   );
 };
 
 export default Mypage;
+
