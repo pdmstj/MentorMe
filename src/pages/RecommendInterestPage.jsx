@@ -11,11 +11,13 @@ export default function RecommendInterestPage() {
   const type = location.state?.type;
 
   const handleSkip = () => {
-    navigate('/self-practice', { state: { type } });
+    const nextPage = type === '대화형' ? '/conversation-practice' : '/self-practice';
+    navigate(nextPage, { state: { type } });
   };
-
+  
   const handleSelect = (interest) => {
-    navigate('/self-practice', { state: { type, interest } });
+    const nextPage = type === '대화형' ? '/conversation-practice' : '/self-practice';
+    navigate(nextPage, { state: { type, interest } });
   };
 
   return (

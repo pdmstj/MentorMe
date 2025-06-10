@@ -8,14 +8,10 @@ export default function InterviewPracticePage() {
   const [activeTab, setActiveTab] = useState('뷰인터 시작');
   const navigate = useNavigate();
 
-   const handleClick = (type) => { 
+  // 🔧 대화형 / 셀프 구분되는 명확한 type 값 전달
+  const handleClick = (type) => { 
     console.log(`${type} 버튼 클릭됨`);
-    
-    if (type === '대화형 면접 연습') {
-      navigate('/mic-camera-check', { state: { type } });
-    } else if (type === '셀프 연습 면접') {
-      navigate('/mic-camera-check', { state: { type } });
-    }
+    navigate('/mic-camera-check', { state: { type } });
   };
 
   const renderContent = () => {
@@ -39,7 +35,7 @@ export default function InterviewPracticePage() {
               <p>1. 마이크 점검 → 2. 역할 선택 → 3. 연습 시작</p>
               <p>4. 연습 종료 → 5. 결과 피드백 확인</p>
             </div>
-            <button className="button" onClick={() => handleClick('대화형 면접 연습')}>연습하기</button>
+            <button className="button" onClick={() => handleClick('대화형')}>연습하기</button>
           </div>
 
           {/* 셀프 연습 면접 */}
@@ -59,7 +55,7 @@ export default function InterviewPracticePage() {
               <p>1. 마이크 점검 → 2. 역할 선택 → 3. 연습 시작</p>
               <p>4. 연습 종료 → 5. 결과 피드백 확인</p>
             </div>
-            <button className="button" onClick={() => handleClick('셀프 연습 면접')}>연습하기</button>
+            <button className="button" onClick={() => handleClick('셀프')}>연습하기</button>
           </div>
         </div>
       );
@@ -68,28 +64,27 @@ export default function InterviewPracticePage() {
 
   return (
     <>
-    <Header />
-    <div className="container">
-      
-      <h1 className="title" style={{ textAlign: 'left' }}>면접 연습</h1>
-      <hr className='hrline-title'/>
+      <Header />
+      <div className="container">
+        <h1 className="title" style={{ textAlign: 'left' }}>면접 연습</h1>
+        <hr className='hrline-title'/>
 
-      {/* 탭 메뉴 */}
-      <div className="tab-menu">
-        {['뷰인터 시작'].map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`tab-button ${activeTab === tab ? 'active' : ''}`}
-          >
-            {tab}
-          </button>
-        ))}
+        {/* 탭 메뉴 */}
+        <div className="tab-menu">
+          {['뷰인터 시작'].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`tab-button ${activeTab === tab ? 'active' : ''}`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+
+        {/* 탭 내용 */}
+        {renderContent()}
       </div>
-
-      {/* 탭 내용 */}
-      {renderContent()}
-    </div>
     </>
   );
 }
