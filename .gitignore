@@ -22,4 +22,6 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-**/firebase.ts__pycache__/ 
+src/firebase.ts
+
+stt_server/__pycache__/
