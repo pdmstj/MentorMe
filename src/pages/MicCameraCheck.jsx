@@ -13,9 +13,19 @@ function MicCameraCheck() {
   const type = location.state?.type;
 
   useEffect(() => {
+    if (!type) {
+      alert("면접 유형 정보가 없습니다. 처음 화면으로 돌아갑니다.");
+      navigate('/');
+      return;
+    }
+
+    let animationId;
+    let stream;
+    let audioCtx;
+
     async function initMedia() {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({
+        stream = await navigator.mediaDevices.getUserMedia({
           video: true,
           audio: true,
         });
@@ -24,7 +34,7 @@ function MicCameraCheck() {
           videoRef.current.srcObject = stream;
         }
 
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const source = audioCtx.createMediaStreamSource(stream);
         const analyser = audioCtx.createAnalyser();
         analyser.fftSize = 256;
@@ -34,9 +44,9 @@ function MicCameraCheck() {
 
         const updateMic = () => {
           analyser.getByteFrequencyData(dataArray);
-          const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
+          const average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
           setMicLevel(average);
-          requestAnimationFrame(updateMic);
+          animationId = requestAnimationFrame(updateMic);
         };
 
         updateMic();
@@ -47,15 +57,20 @@ function MicCameraCheck() {
     }
 
     initMedia();
-  }, []);
+
+    return () => {
+      if (animationId) cancelAnimationFrame(animationId);
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+      if (audioCtx) {
+        audioCtx.close();
+      }
+    };
+  }, [navigate, type]);
 
   const handleStart = () => {
-    if (type) {
-      navigate('/recommend-interest', { state: { type } });
-    } else {
-      alert("면접 유형 정보가 없습니다. 처음 화면으로 돌아갑니다.");
-      navigate('/');
-    }
+    navigate('/recommend-interest', { state: { type } });
   };
 
   return (
@@ -83,7 +98,13 @@ function MicCameraCheck() {
         {error && <p className="error">{error}</p>}
 
         <div className="video-wrapper-check">
-          <video ref={videoRef} autoPlay playsInline muted className="video-preview-check" />
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            className="video-preview-check"
+          />
         </div>
 
         <div className="mic-visualizer">
