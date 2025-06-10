@@ -1,70 +1,52 @@
-# Getting Started with Create React App
+# 🧠 MentorMe - AI 기반 모의 면접 분석 플랫폼
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+> ✨ 당신의 면접 피드백을 AI가 도와드립니다.
 
-## Available Scripts
+MentorMe는 사용자의 면접 영상을 분석하여  
+시선, 표정, 자세 등 비언어적 커뮤니케이션 요소를 정량적으로 평가하고  
+AI 기반 피드백을 제공하는 모의 면접 분석 플랫폼입니다.
 
-In the project directory, you can run:
+---
 
-### `npm start`
+## 📌 데모 영상  
+🚧 준비 중입니다 (프론트엔드와 통합 예정)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+---
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## 🧩 기능 요약
 
-### `npm test`
+| 기능 | 설명 |
+|------|------|
+| 🎤 음성 인식 (STT) | Whisper 모델 기반 음성 → 텍스트 변환 |
+| 👁 시선 분석 | MediaPipe로 시선 추적 (면접자 집중도 확인) |
+| 😊 표정 분석 | 감정 상태 분석 (기쁨, 슬픔, 분노 등) |
+| 🧍 자세 분석 | 자세 흐트러짐/움직임 분석 |
+| 📊 점수화 시스템 | 각 항목에 점수를 부여하여 피드백 제공 |
+| ☁️ Firebase 저장 | 분석 결과: Firestore / 영상 파일: Storage |
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+---
 
-### `npm run build`
+## ⚙️ 기술 스택
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- **Backend**: FastAPI (Python)  
+- **STT**: OpenAI Whisper  
+- **영상 분석**: MediaPipe, OpenCV  
+- **데이터 저장소**: Firebase Firestore, Firebase Storage  
+- **기타**: UUID, OS, Uvicorn
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+---
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## 🔮 향후 업데이트 예정
+ Whisper 기반 음성 인식
 
-### `npm run eject`
+ MediaPipe + OpenCV 기반 시선/표정/자세 분석
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+ Firebase 연동을 통한 분석 결과 저장
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+ 프론트엔드와 통합된 웹 UI
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+ AI 질문자: GPT 기반 면접 질문 생성기
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+ 결과 기반 피드백 요약 생성 (LLM 연동)
 
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+---
