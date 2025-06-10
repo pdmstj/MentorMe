@@ -12,16 +12,19 @@ export interface Company {
 }
 
 export const Container = styled.div`
-  width: 80%; 
+  width: 100%;
   min-height: 100vh;
-  background: #fff;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   font-family: 'Pretendard', sans-serif;
-  margin: 0 auto;
+  background: #fff;
+  padding: 0 24px;
+  box-sizing: border-box;
+  overflow-x: hidden;
 `;
+
 
 export const StyledSlider = styled(Slider)`
   width: 100%;

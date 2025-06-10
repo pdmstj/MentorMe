@@ -8,7 +8,6 @@ function MicCameraCheck() {
   const navigate = useNavigate();
   const location = useLocation();
   const videoRef = useRef(null);
-  const canvasRef = useRef(null);
   const [micLevel, setMicLevel] = useState(0);
   const [error, setError] = useState("");
   const type = location.state?.type;
@@ -51,10 +50,8 @@ function MicCameraCheck() {
   }, []);
 
   const handleStart = () => {
-    if (type === '대화형 면접 연습') {
-      navigate('/conversation-practice');
-    } else if (type === '셀프 연습 면접') {
-      navigate('/self-practice');
+    if (type) {
+      navigate('/recommend-interest', { state: { type } });
     } else {
       alert("면접 유형 정보가 없습니다. 처음 화면으로 돌아갑니다.");
       navigate('/');
@@ -66,7 +63,7 @@ function MicCameraCheck() {
       <div className="header-container">
         <div className="title-box">
           <div className="title-logo">
-            <img src={logoImg} alt="로고" className='logo-img'/>
+            <img src={logoImg} alt="로고" className="logo-img" />
           </div>
           <span className="title-text">마이크 카메라 확인</span>
         </div>
