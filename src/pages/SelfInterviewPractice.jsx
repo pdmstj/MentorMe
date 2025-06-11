@@ -50,6 +50,20 @@ const SelfInterviewPractice = () => {
     loadQuestions();
   }, [category]);
 
+  // 질문이 바뀔 때마다 TTS 실행하는 부분 추가
+  useEffect(() => {
+    if (questions.length === 0) return;
+
+    const questionText = questions[questionIndex];
+    if (!questionText) return;
+
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(questionText);
+    utterance.lang = 'ko-KR';
+    window.speechSynthesis.speak(utterance);
+  }, [questionIndex, questions]);
+
   useEffect(() => {
     if (questions.length === 0) return;
     const timer = setInterval(() => {
