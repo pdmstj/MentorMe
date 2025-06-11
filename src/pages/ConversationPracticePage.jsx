@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import '../pages/ConversationPracticePage.css';  
+import '../pages/ConversationPracticePage.css';  // 두번째 스타일 css
 import frame34 from "../image/Frame 34.svg";
 import ai_men from "../image/aimento.png";
 import logoImg from "../image/mentorme_logo.png";
@@ -52,13 +52,35 @@ const SelfInterviewPracticeStyled = () => {
     loadQuestions();
   }, [category]);
 
-  // 30초마다 질문 변경
+  // 30초마다 질문 변경 및 TTS 실행
   useEffect(() => {
     if (questions.length === 0) return;
+
+    // 질문을 음성으로 읽어주는 함수
+    const speakQuestion = (text) => {
+      if (!window.speechSynthesis) return;
+      window.speechSynthesis.cancel();  // 기존 읽기 취소
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'ko-KR'; // 한국어 설정
+      window.speechSynthesis.speak(utterance);
+    };
+
+    // 첫 질문 읽기
+    speakQuestion(questions[questionIndex]);
+
     const timer = setInterval(() => {
-      setQuestionIndex((prev) => (prev + 1) % questions.length);
+      setQuestionIndex((prev) => {
+        const nextIndex = (prev + 1) % questions.length;
+        speakQuestion(questions[nextIndex]);
+        return nextIndex;
+      });
     }, 30000);
-    return () => clearInterval(timer);
+
+    return () => {
+      clearInterval(timer);
+      window.speechSynthesis.cancel();
+    };
   }, [questions]);
 
   // 웹캠 및 녹화 시작
