@@ -12,7 +12,8 @@ export default function RecommendInterestPage() {
 
   const handleSkip = () => {
     const nextPage = type === '대화형' ? '/conversation-practice' : '/self-practice';
-    navigate(nextPage, { state: { type } });
+    // ✅ 건너뛰기일 때 interest: "건너뛰기"로 명시
+    navigate(nextPage, { state: { type, interest: "건너뛰기" } });
   };
   
   const handleSelect = (interest) => {
@@ -22,10 +23,10 @@ export default function RecommendInterestPage() {
 
   return (
     <div className="recommend-container">
-    <h2 className="recommend-title">관심 직무를 선택해주세요</h2>
-    <p className="recommend-subtext">
-      <strong>건너뛰기</strong>를 누르면 선택한 역할과 관계없이 <span className="highlight">인성 질문</span>만 출제됩니다.
-    </p>
+      <h2 className="recommend-title">관심 직무를 선택해주세요</h2>
+      <p className="recommend-subtext">
+        <strong>건너뛰기</strong>를 누르면 선택한 역할과 관계없이 <span className="highlight">인성 질문</span>만 출제됩니다.
+      </p>
       <div className="options-container">
         <div className="option-card plan" onClick={() => handleSelect("기획")}>
           <img src={planImg} alt="기획" width="80" />
