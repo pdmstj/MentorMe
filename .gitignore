@@ -25,3 +25,5 @@ yarn-error.log*
 src/firebase.ts
 
 stt_server/__pycache__/
+
+/venv
