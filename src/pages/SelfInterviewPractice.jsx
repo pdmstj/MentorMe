@@ -1,58 +1,94 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import '../pages/SelfInterviewPractice.css';
 import frame34 from "../image/Frame 34.svg";
 import logoImg from "../image/mentorme_logo.png";
+import { fetchQuestionsByCategory } from '../services/questionService';
 
-const questions = [
-  { tag: '문제해결 역량', text: '과제나 프로젝트를 수행하는 과정에서 문제가 발생하여 해결했던 경험에 대해 이야기해주세요.' },
-  { tag: '협업 경험', text: '팀 프로젝트에서 갈등이 있었던 경험과 어떻게 해결했는지 말씀해주세요.' },
-  { tag: '성장 경험', text: '본인이 성장했다고 느꼈던 경험에 대해 이야기해주세요.' },
-  { tag: '지원 동기', text: '해당 직무나 회사에 지원하게 된 계기를 말씀해주세요.' }
-];
+const categoryMap = {
+  "기획": "management",
+  "경영": "management",
+  "마케팅": "management",
+  "기술": "develop",
+  "개발": "develop",
+  "디자인": "design",
+  "미디어": "design",
+  "콘텐츠": "design",
+  "건너뛰기": "tenacity"
+};
 
 const SelfInterviewPractice = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const rawCategory = (location.state?.interest || "").trim();
+  const category = categoryMap[rawCategory] ?? "design";
+
   const videoRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
   const [mediaStream, setMediaStream] = useState(null);
   const [recording, setRecording] = useState(false);
   const [recordedBlob, setRecordedBlob] = useState(null);
+  const [questions, setQuestions] = useState([]);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [recordingTime, setRecordingTime] = useState(0);
-  const [loading, setLoading] = useState(false); // ✅ 로딩 상태 추가
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    const loadQuestions = async () => {
+      try {
+        const qs = await fetchQuestionsByCategory(category);
+        if (!qs || qs.length === 0) {
+          alert("해당 카테고리의 질문이 없습니다.");
+        }
+        setQuestions(qs);
+      } catch (err) {
+        console.error("질문 로딩 실패:", err);
+      }
+    };
+    loadQuestions();
+  }, [category]);
+
+  // 질문이 바뀔 때마다 TTS 실행하는 부분 추가
+  useEffect(() => {
+    if (questions.length === 0) return;
+
+    const questionText = questions[questionIndex];
+    if (!questionText) return;
+
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(questionText);
+    utterance.lang = 'ko-KR';
+    window.speechSynthesis.speak(utterance);
+  }, [questionIndex, questions]);
+
+  useEffect(() => {
+    if (questions.length === 0) return;
     const timer = setInterval(() => {
       setQuestionIndex((prev) => (prev + 1) % questions.length);
     }, 30000);
     return () => clearInterval(timer);
-  }, []);
+  }, [questions]);
 
   useEffect(() => {
     const startCameraAndRecording = async () => {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: true,
-          audio: true,
-        });
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
         setMediaStream(stream);
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
+        if (videoRef.current) videoRef.current.srcObject = stream;
 
         const mediaRecorder = new MediaRecorder(stream);
         mediaRecorderRef.current = mediaRecorder;
+        chunksRef.current = [];
 
         mediaRecorder.ondataavailable = (e) => {
-          if (e.data.size > 0) {
-            chunksRef.current.push(e.data);
-          }
+          if (e.data.size > 0) chunksRef.current.push(e.data);
         };
 
         mediaRecorder.onstop = async () => {
-          setLoading(true); // ✅ 녹화 끝나자마자 로딩 true
+          setLoading(true);
           const blob = new Blob(chunksRef.current, { type: 'video/webm' });
           setRecordedBlob(blob);
           const videoUrl = URL.createObjectURL(blob);
@@ -82,7 +118,7 @@ const SelfInterviewPractice = () => {
           } catch (error) {
             console.error('STT 서버 에러:', error);
             alert('음성 인식 중 오류가 발생했습니다.');
-            setLoading(false); // 실패시 로딩 해제
+            setLoading(false);
           }
 
           stream.getTracks().forEach((track) => track.stop());
@@ -106,6 +142,10 @@ const SelfInterviewPractice = () => {
     return () => clearInterval(timer);
   }, [recording]);
 
+  const extractAudio = async (videoBlob) => {
+    return videoBlob; // STT 서버가 video/webm에서 직접 처리 가능하다면 이대로
+  };
+
   const formatTime = (s) => {
     const m = String(Math.floor(s / 60)).padStart(2, '0');
     const sec = String(s % 60).padStart(2, '0');
@@ -114,7 +154,7 @@ const SelfInterviewPractice = () => {
 
   const goToFeedback = () => {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-      setLoading(true); // ✅ 버튼 누를 때도 로딩 true
+      setLoading(true);
       mediaRecorderRef.current.stop();
       setRecording(false);
     } else if (recordedBlob) {
@@ -125,13 +165,9 @@ const SelfInterviewPractice = () => {
     }
   };
 
-  const extractAudio = async (videoBlob) => {
-    return videoBlob;
-  };
-
   return (
     <>
-      {loading && ( // ✅ 로딩 오버레이
+      {loading && (
         <div className="loading-overlay">
           <div className="spinner" />
           <p>🌀 분석 중입니다. 잠시만 기다려주세요...</p>
@@ -139,7 +175,7 @@ const SelfInterviewPractice = () => {
         </div>
       )}
 
-      {!loading && ( // ✅ 로딩 중 아닐 때만 본 화면
+      {!loading && (
         <>
           <div className="header-container">
             <div className="title-box">
@@ -155,8 +191,10 @@ const SelfInterviewPractice = () => {
             <div className="question-container">
               <img className="img" alt="Frame" src={frame34} />
               <div className="question-section">
-                <span className="question-tag">🧠 {questions[questionIndex].tag}</span>
-                <p className="question-text">{questions[questionIndex].text}</p>
+                <span className="question-tag">🧠 질문</span>
+                <p className="question-text">
+                  {questions.length > 0 ? questions[questionIndex] : "질문을 불러오고 있습니다..."}
+                </p>
               </div>
             </div>
 
@@ -165,11 +203,7 @@ const SelfInterviewPractice = () => {
               <span className="recording-text">녹화중 {formatTime(recordingTime)}</span>
               <button className="pause-button" disabled>일시정지</button>
               <div className="waveform">
-                <div className="bar" />
-                <div className="bar" />
-                <div className="bar" />
-                <div className="bar" />
-                <div className="bar" />
+                <div className="bar" /><div className="bar" /><div className="bar" /><div className="bar" /><div className="bar" />
               </div>
               <button className="feedback-button" onClick={goToFeedback}>피드백 보러가기</button>
             </div>
