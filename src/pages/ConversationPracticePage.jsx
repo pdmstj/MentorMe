@@ -103,29 +103,43 @@ const SelfInterviewPracticeStyled = () => {
           const blob = new Blob(chunksRef.current, { type: 'video/webm' });
           setRecordedBlob(blob);
           const videoUrl = URL.createObjectURL(blob);
-          const file = new File([blob], 'audio.webm', { type: 'audio/webm' });
+          const file = new File([blob], 'interview.webm', { type: 'video/webm' });
           const formData = new FormData();
           formData.append('file', file);
 
           try {
-            const response = await fetch('http://localhost:8000/stt/', {
+            // 서버에 영상 저장
+            const saveRes = await fetch('http://localhost:5000/upload', {
               method: 'POST',
               body: formData,
             });
 
-            const data = await response.json();
-            console.log("STT 결과: ", data.text);
+            if (!saveRes.ok) throw new Error("영상 저장 실패");
+            const saveResult = await saveRes.json();
+            console.log("영상 저장 성공:", saveResult);
 
+            // STT 서버 요청
+            const sttRes = await fetch('http://localhost:8000/stt/', {
+              method: 'POST',
+              body: formData,
+            });
+
+            if (!sttRes.ok) throw new Error("STT 요청 실패");
+            const sttData = await sttRes.json();
+            console.log("STT 결과:", sttData.text);
+
+            // 피드백 페이지 이동
             navigate('/feedback', {
               state: {
                 videoUrl,
-                sttText: data.text,
+                sttText: sttData.text,
                 type: 'self',
-              }
+                savedPath: saveResult.path, // 서버 저장 경로 전달
+              },
             });
           } catch (error) {
-            console.error('STT 서버 에러:', error);
-            alert('음성 인식 중 오류가 발생했습니다.');
+            console.error('저장 또는 STT 에러:', error);
+            alert('영상 저장 또는 분석 중 오류가 발생했습니다.');
             setLoading(false);
           }
 
@@ -136,6 +150,7 @@ const SelfInterviewPracticeStyled = () => {
         setRecording(true);
       } catch (err) {
         console.error('웹캠 접근 오류:', err);
+        alert('웹캠 접근 권한이 필요합니다.');
       }
     };
 
