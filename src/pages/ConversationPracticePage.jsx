@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import '../pages/ConversationPracticePage.css';  // 두번째 스타일 css
+import '../pages/ConversationPracticePage.css';
 import frame34 from "../image/Frame 34.svg";
 import ai_men from "../image/aimento.png";
 import logoImg from "../image/mentorme_logo.png";
@@ -36,7 +36,6 @@ const SelfInterviewPracticeStyled = () => {
   const [recordingTime, setRecordingTime] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  // 질문 불러오기
   useEffect(() => {
     const loadQuestions = async () => {
       try {
@@ -52,21 +51,22 @@ const SelfInterviewPracticeStyled = () => {
     loadQuestions();
   }, [category]);
 
-  // 30초마다 질문 변경 및 TTS 실행
+  // 질문 TTS 읽기
   useEffect(() => {
     if (questions.length === 0) return;
+    if (loading) {
+      window.speechSynthesis.cancel();  // 분석 중이면 읽기 중단
+      return;
+    }
 
-    // 질문을 음성으로 읽어주는 함수
     const speakQuestion = (text) => {
       if (!window.speechSynthesis) return;
-      window.speechSynthesis.cancel();  // 기존 읽기 취소
-
+      window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'ko-KR'; // 한국어 설정
+      utterance.lang = 'ko-KR';
       window.speechSynthesis.speak(utterance);
     };
 
-    // 첫 질문 읽기
     speakQuestion(questions[questionIndex]);
 
     const timer = setInterval(() => {
@@ -81,9 +81,8 @@ const SelfInterviewPracticeStyled = () => {
       clearInterval(timer);
       window.speechSynthesis.cancel();
     };
-  }, [questions]);
+  }, [questions, questionIndex, loading]);
 
-  // 웹캠 및 녹화 시작
   useEffect(() => {
     const startCameraAndRecording = async () => {
       try {
@@ -101,15 +100,10 @@ const SelfInterviewPracticeStyled = () => {
 
         mediaRecorder.onstop = async () => {
           setLoading(true);
-
           const blob = new Blob(chunksRef.current, { type: 'video/webm' });
           setRecordedBlob(blob);
           const videoUrl = URL.createObjectURL(blob);
-
-          // 오디오 추출 대신 그대로 Blob 전송 (원래 로직 유지)
-          const audioBlob = blob;
-
-          const file = new File([audioBlob], 'audio.webm', { type: 'audio/webm' });
+          const file = new File([blob], 'audio.webm', { type: 'audio/webm' });
           const formData = new FormData();
           formData.append('file', file);
 
@@ -148,7 +142,6 @@ const SelfInterviewPracticeStyled = () => {
     startCameraAndRecording();
   }, []);
 
-  // 녹화 시간 타이머
   useEffect(() => {
     if (!recording) return;
     const timer = setInterval(() => {
