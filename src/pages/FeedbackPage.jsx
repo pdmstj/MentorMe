@@ -8,10 +8,9 @@ const FeedbackPage = () => {
   const location = useLocation();
   const navigate = useNavigate(); 
   const videoUrl = location.state?.videoUrl;
-  const sttText = location.state?.sttText;  // Whisper 텍스트
-  const type = location.state?.type;        // 🔥 'conversation' | 'self' 타입 받아오기
+  const sttText = location.state?.sttText;
+  const type = location.state?.type;
 
-  // 🧠 타입에 따라 피드백 다르게
   const feedbackSummary = sttText
     ? type === 'self'
       ? {
@@ -44,6 +43,39 @@ const FeedbackPage = () => {
           ]
         }
     : null;
+
+  // 🔥 저장 버튼 클릭 시 서버에 업로드 요청
+  const handleSave = async () => {
+    if (!videoUrl) {
+      alert("저장할 영상이 없습니다.");
+      return;
+    }
+
+    try {
+      const res = await fetch(videoUrl);
+      const videoBlob = await res.blob();
+      const videoFile = new File([videoBlob], 'feedback_video.webm', { type: 'video/webm' });
+      const formData = new FormData();
+      formData.append('video', videoFile);
+
+      const uploadRes = await fetch('http://localhost:5000/upload', {
+      method: 'POST',
+      body: formData
+      });
+
+      if (!uploadRes.ok) {
+        throw new Error("업로드 실패");
+      }
+
+      const result = await uploadRes.json();
+      alert("저장 완료! ✅");
+
+      // 필요시 마이페이지로 이동 등 추가 처리 가능
+    } catch (err) {
+      console.error("영상 저장 중 오류:", err);
+      alert("영상 저장 실패 ❌");
+    }
+  };
 
   return (
     <>
@@ -80,7 +112,6 @@ const FeedbackPage = () => {
           <div className="feedback-box">
             <h3 className="box-title">AI 분석 기반 피드백</h3>
 
-            {/* STT 텍스트 */}
             <div className="feedback-item">
               <h4 className="feedback-heading">📝 인식된 답변</h4>
               <p className="feedback-text">
@@ -89,10 +120,8 @@ const FeedbackPage = () => {
               <hr className="feedback-hr" />
             </div>
 
-            {/* 분석 */}
             {feedbackSummary && (
               <>
-                {/* 강점 */}
                 <div className="feedback-item">
                   <h4 className="feedback-heading">🌟 강점 분석</h4>
                   <ul className="feedback-text">
@@ -103,7 +132,6 @@ const FeedbackPage = () => {
                   <hr className="feedback-hr" />
                 </div>
 
-                {/* 보완점 */}
                 <div className="feedback-item">
                   <h4 className="feedback-heading">🛠️ 보완점</h4>
                   <ul className="feedback-text">
@@ -114,7 +142,6 @@ const FeedbackPage = () => {
                   <hr className="feedback-hr" />
                 </div>
 
-                {/* 팁 */}
                 <div className="feedback-item">
                   <h4 className="feedback-heading">💡 면접 팁</h4>
                   <ul className="feedback-text">
@@ -133,7 +160,7 @@ const FeedbackPage = () => {
       <p className="recheck-msg">결과는 <a href="/mypage">마이페이지&gt;최근 면접 보기</a> 에서 다시 확인할 수 있어요</p>
 
       <div className="button-group">
-        <button className="btn">저장</button>
+        <button className="btn" onClick={handleSave}>저장</button>
         <button className="btn">삭제</button>
       </div>
     </>
