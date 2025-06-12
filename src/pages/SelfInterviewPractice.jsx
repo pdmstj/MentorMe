@@ -50,8 +50,13 @@ const SelfInterviewPractice = () => {
     loadQuestions();
   }, [category]);
 
-  // 질문이 바뀔 때마다 TTS 실행하는 부분 추가
+  // 질문이 바뀔 때마다 TTS 실행하는 부분 (loading=true면 멈춤)
   useEffect(() => {
+    if (loading) {
+      window.speechSynthesis.cancel(); // 분석 중이면 음성 중단
+      return;
+    }
+
     if (questions.length === 0) return;
 
     const questionText = questions[questionIndex];
@@ -62,7 +67,7 @@ const SelfInterviewPractice = () => {
     const utterance = new SpeechSynthesisUtterance(questionText);
     utterance.lang = 'ko-KR';
     window.speechSynthesis.speak(utterance);
-  }, [questionIndex, questions]);
+  }, [questionIndex, questions, loading]);
 
   useEffect(() => {
     if (questions.length === 0) return;
