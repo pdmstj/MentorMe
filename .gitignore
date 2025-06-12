@@ -28,6 +28,4 @@ stt_server/__pycache__/
 
 /venv
 
-video-upload/node_modules
-
-video-upload/uploads
+Backend/uploads
