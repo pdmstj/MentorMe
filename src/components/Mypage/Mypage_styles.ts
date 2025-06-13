@@ -18,7 +18,6 @@ export const FixedImage = styled.img`
   pointer-events: none;
 `;
 
-
 export const Section = styled.section`
   margin: 5rem 0; 
 `;
@@ -49,8 +48,10 @@ export const ProfileSection = styled.div`
   }
 `;
 
-export const ProfileButton = styled.button`
-  filter: grayscale(100%); // 흑백 처리
+// 여기만 button -> label로 변경했습니다.
+export const ProfileButton = styled.label`
+  filter: grayscale(100%);
+  cursor: pointer;
 `;
 
 export const ProfileImage = styled.img`
@@ -60,7 +61,7 @@ export const ProfileImage = styled.img`
 
 export const InfoRow = styled.p`
   margin: 0.5rem 0;
-  filter: grayscale(100%); // 흑백 처리
+  filter: grayscale(100%);
 `;
 
 export const Input = styled.input`
@@ -91,14 +92,11 @@ export const Select = styled.select`
   background-size: 16px 16px;
   cursor: pointer;
 
-  /* ✅ option도 깔끔하게 */
   option {
     padding: 12px 16px;
     font-size: 1rem;
     background-color: #fff;
     color: #333;
-    padding: 12px 16px;
-    font-size: 1rem;
   }
 `;
 
@@ -110,7 +108,6 @@ export const SelectWrapper = styled.div`
     width: 100%;
   }
 `;
-
 
 export const TagList = styled.div`
   display: flex;
@@ -134,7 +131,7 @@ export const JobList = styled.div`
   margin-top: 20px;
 `;
 
-export const JobItem = styled.div<{ isSelected: boolean }>`
+export const JobItem = styled.div<{ $isSelected: boolean }>`
   padding: 14px;
   font-size: 15px;
   text-align: center;
@@ -142,13 +139,12 @@ export const JobItem = styled.div<{ isSelected: boolean }>`
   background-color: #fff;
   cursor: pointer;
 
-  ${({ isSelected }) =>
-    isSelected &&
+  ${({ $isSelected }) =>
+    $isSelected &&
     `
       border-color: #2979ff;
       color: #2979ff;
-    `
-  }
+    `}
 `;
 
 // 지식 · 기술 섹션
@@ -158,7 +154,7 @@ export const SkillList = styled.div`
   gap: 12px;
 `;
 
-export const SkillTag = styled.div<{ isSelected: boolean }>`
+export const SkillTag = styled.div<{ $isSelected: boolean }>`
   padding: 10px 16px;
   font-size: 1rem;
   border: 2px solid #ccc;
@@ -167,8 +163,8 @@ export const SkillTag = styled.div<{ isSelected: boolean }>`
   cursor: pointer;
   text-align: center;
 
-  ${({ isSelected }) =>
-    isSelected &&
+  ${({ $isSelected }) =>
+    $isSelected &&
     `
       border-color: #2979ff;
       color: #2979ff;
@@ -247,7 +243,3 @@ export const AddRecordButton = styled.button`
     text-decoration: underline;
   }
 `;
-
-
-
-
