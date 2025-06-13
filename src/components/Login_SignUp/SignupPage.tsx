@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Container, Form, Input, Button, Title, Label, InputWrapper } from "./SignupPage_styles";
 import { UserContext } from "../../contexts/UserContext";
 import { db, auth } from "../../firebase";
-import { doc, setDoc } from "firebase/firestore"; // 🔥 setDoc 추가
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { collection, addDoc } from "firebase/firestore";
+import { createUserWithEmailAndPassword } from "firebase/auth"; // auto 계정 생성
 
 function SignupPage() {
   const [formData, setFormData] = useState({
@@ -29,13 +29,13 @@ function SignupPage() {
     }
 
     try {
-      // Firebase Auth에 계정 생성
+      //  Firebase Auth에 계정 생성
       const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
       const user = userCredential.user;
 
-      // Firestore에 유저 정보 저장 (문서 ID를 user.uid로 지정)
-      await setDoc(doc(db, "users", user.uid), {
-        uid: user.uid,
+      //  Firestore에 유저 정보 저장
+      await addDoc(collection(db, "users"), {
+        uid: user.uid, // 유저 고유 UID
         id: formData.id,
         name: formData.name,
         email: formData.email,
@@ -44,7 +44,7 @@ function SignupPage() {
         createdAt: new Date(),
       });
 
-      // Context에 로그인 처리
+      //  Context에 로그인 처리
       login(formData.name, formData.email, formData.phone, formData.birth);
 
       alert("회원가입이 완료되었습니다!");
@@ -64,17 +64,20 @@ function SignupPage() {
     <Container>
       <Title>회원가입</Title>
       <Form onSubmit={handleSubmit}>
+        {/* id */}
         <InputWrapper>
           <Label htmlFor="id">아이디</Label>
           <Input type="text" id="id" name="id" value={formData.id} onChange={handleChange} required />
         </InputWrapper>
 
+        {/* 비밀번호 */}
         <InputWrapper>
           <Label htmlFor="password">비밀번호</Label>
           <Input type="password" id="password" name="password" value={formData.password} onChange={handleChange} required />
           <Input type="password" id="confirmPassword" name="confirmPassword" placeholder="비밀번호 확인" value={formData.confirmPassword} onChange={handleChange} required />
         </InputWrapper>
 
+        {/* 기타 항목 */}
         <InputWrapper>
           <Label htmlFor="name">이름</Label>
           <Input type="text" id="name" name="name" value={formData.name} onChange={handleChange} required />
