@@ -36,6 +36,7 @@ const companies: Company[] = [
   { id: "microft", name: "마이크로소프트", description: "세계적인 소프트웨어 기업으로, Windows 운영체제와 Office 제품군 등을 제공.", tags: ["#UI/UX", "#3D", "#그래픽"], image: "", heartCount: 1123 },
   { id: "samsg", name: "삼성", description: "글로벌 전자 기업으로 스마트폰, 가전, 반도체 등 다양한 분야에서 활동.", tags: ["#UI/UX", "#그래픽", "#영상"], image: "", heartCount: 1000 },
   { id: "microft", name: "마이크로소프트", description: "세계적인 소프트웨어 기업으로, Windows 운영체제와 Office 제품군 등을 제공.", tags: ["#UI/UX", "#3D", "#그래픽"], image: "", heartCount: 1123 },
+
 ];
 
 // 슬라이드 설정
@@ -43,7 +44,7 @@ const sliderSettings = {
   dots: false,
   infinite: false,
   speed: 600,
-  slidesToShow: 4,
+  slidesToShow: 6,
   slidesToScroll: 3,
   arrows: false
 };
