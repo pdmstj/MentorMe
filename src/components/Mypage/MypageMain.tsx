@@ -1,26 +1,24 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import './MypageMain.css';
 import { UserContext } from '../../contexts/UserContext';
+import logoImg from '../../image/mentorme_logo.png';
 
 const MypageMain = () => {
   const navigate = useNavigate();
   const { user } = useContext(UserContext);
   const [videos, setVideos] = useState<string[]>([]);
 
-  // ✅ 특정 섹션으로 이동
   const handleSectionClick = (sectionId: string) => {
     navigate(`/mypage#${sectionId}`);
   };
 
-  // + 버튼 클릭
   const handlePlusClick = () => {
     navigate('/mypage');
   };
 
-  // 서버에서 영상 목록 불러오기
   useEffect(() => {
-    fetch('http://localhost:5000/videos')  // Flask 서버 주소에 맞게 수정
+    fetch('http://localhost:5000/videos')
       .then(res => res.json())
       .then(data => {
         if (data.videos) {
@@ -34,6 +32,13 @@ const MypageMain = () => {
 
   return (
     <div className="mypage-container">
+      {/* ✅ Header와 동일한 구조로 로고 추가 */}
+      <div className="mypage-header">
+        <Link to="/" className="logo">
+          <img src={logoImg} alt="로고" className="logo-img" />
+        </Link>
+      </div>
+
       <div className="mypage-menu">
         <div className="menu-item active">프로필</div>
         <div className="menu-item">모의면접 기록</div>
@@ -43,9 +48,10 @@ const MypageMain = () => {
       <div className="mypage-content">
         <div className="mypage-sidebar">
           <div className="sidebar-title">마이페이지</div>
-          <a href="#" className="recommend-msg">기업 추천을 받을 수 있어요.</a>
+          <button className="recommend-msg" onClick={() => alert('추천 기능 준비 중!')}>
+            기업 추천을 받을 수 있어요.
+          </button>
           <div className="sidebar-buttons">
-            {/* ✅ 각각 이동할 섹션 ID 설정 */}
             <button onClick={() => handleSectionClick('basic-info')}>기본정보 <span className="required">*</span></button>
             <button onClick={() => handleSectionClick('preference-info')}>선호정보</button>
             <button onClick={() => handleSectionClick('education-info')}>학력</button>
@@ -95,7 +101,6 @@ const MypageMain = () => {
               <button className="plus-btn">＋</button>
             </div>
             <div className="interview-cards">
-              {/* 영상 목록을 <video> 태그로 보여주기 */}
               {videos.length > 0 ? (
                 videos.map((videoUrl, idx) => (
                   <video
