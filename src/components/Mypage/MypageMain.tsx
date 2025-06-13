@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './MypageMain.css';
 import { UserContext } from '../../contexts/UserContext';
@@ -6,6 +6,7 @@ import { UserContext } from '../../contexts/UserContext';
 const MypageMain = () => {
   const navigate = useNavigate();
   const { user } = useContext(UserContext);
+  const [videos, setVideos] = useState<string[]>([]);
 
   // ✅ 특정 섹션으로 이동
   const handleSectionClick = (sectionId: string) => {
@@ -16,6 +17,20 @@ const MypageMain = () => {
   const handlePlusClick = () => {
     navigate('/mypage');
   };
+
+  // 서버에서 영상 목록 불러오기
+  useEffect(() => {
+    fetch('http://localhost:5000/videos')  // Flask 서버 주소에 맞게 수정
+      .then(res => res.json())
+      .then(data => {
+        if (data.videos) {
+          setVideos(data.videos);
+        }
+      })
+      .catch(err => {
+        console.error('영상 목록 불러오기 실패:', err);
+      });
+  }, []);
 
   return (
     <div className="mypage-container">
@@ -80,9 +95,21 @@ const MypageMain = () => {
               <button className="plus-btn">＋</button>
             </div>
             <div className="interview-cards">
-              <div className="card">2024.08.19</div>
-              <div className="card">2025.01.07</div>
-              <div className="card">2025.05.17</div>
+              {/* 영상 목록을 <video> 태그로 보여주기 */}
+              {videos.length > 0 ? (
+                videos.map((videoUrl, idx) => (
+                  <video
+                    key={idx}
+                    src={videoUrl}
+                    controls
+                    width="320"
+                    height="180"
+                    style={{ marginRight: 10, marginBottom: 10, borderRadius: 8 }}
+                  />
+                ))
+              ) : (
+                <div>영상이 없습니다.</div>
+              )}
             </div>
           </div>
         </div>
