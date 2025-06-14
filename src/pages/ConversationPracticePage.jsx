@@ -108,41 +108,42 @@ const SelfInterviewPracticeStyled = () => {
           formData.append('file', file);
 
           try {
-            // 서버에 영상 저장
+            // 1. 업로드
             const saveRes = await fetch('http://localhost:5000/upload', {
               method: 'POST',
               body: formData,
             });
-
+        
             if (!saveRes.ok) throw new Error("영상 저장 실패");
             const saveResult = await saveRes.json();
-            console.log("영상 저장 성공:", saveResult);
-
-            // STT 서버 요청
-            const sttRes = await fetch('http://localhost:8000/stt/', {
+            const uploadedFilename = saveResult.path.split("/").pop();
+        
+            // 2. 분석 요청
+            const analyzeRes = await fetch('http://localhost:5001/analyze', {
               method: 'POST',
-              body: formData,
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ filename: uploadedFilename }),
             });
-
-            if (!sttRes.ok) throw new Error("STT 요청 실패");
-            const sttData = await sttRes.json();
-            console.log("STT 결과:", sttData.text);
-
-            // 피드백 페이지 이동
+        
+            if (!analyzeRes.ok) throw new Error("분석 요청 실패");
+            const analyzeResult = await analyzeRes.json();
+        
+            // 3. 이동
             navigate('/feedback', {
               state: {
                 videoUrl,
-                sttText: sttData.text,
+                sttText: analyzeResult.text,
+                expressionResult: JSON.stringify(analyzeResult.frames, null, 2),
                 type: 'self',
-                savedPath: saveResult.path, // 서버 저장 경로 전달
               },
             });
-          } catch (error) {
-            console.error('저장 또는 STT 에러:', error);
-            alert('영상 저장 또는 분석 중 오류가 발생했습니다.');
+        
+          } catch (err) {
+            console.error("분석 오류:", err);
+            alert("분석 중 오류 발생 ❌");
             setLoading(false);
           }
-
+        
           stream.getTracks().forEach((track) => track.stop());
         };
 
