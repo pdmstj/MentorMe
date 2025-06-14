@@ -45,7 +45,12 @@ function SignupPage() {
       });
 
       //  Context에 로그인 처리
-      login(formData.name, formData.email, formData.phone, formData.birth);
+      login({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        birth: formData.birth,
+      });
 
       alert("회원가입이 완료되었습니다!");
       navigate("/");

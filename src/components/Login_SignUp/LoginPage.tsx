@@ -32,8 +32,16 @@ function LoginPage() {
 
       const userData = querySnapshot.docs[0].data();
 
+      // 콘솔 출력 추가
+      console.log("로그인 성공, userData:", userData);
+
       // Context에 로그인 정보 저장
-      login(userData.name, userData.email, userData.phone, userData.birth);
+      login({
+        name: userData.name,
+        email: userData.email,
+        phone: userData.phone,
+        birth: userData.birth,
+      });
 
       alert(`${userData.name}님, 로그인되었습니다.`);
       navigate("/");

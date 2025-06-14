@@ -1,16 +1,23 @@
-import { createContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useState, useEffect, ReactNode, useContext } from "react";
 
-// 유저 데이터 타입 정의
+// 유저 데이터 타입 정의 (필요한 필드 모두 추가)
 interface User {
+  uid?: string;
+  id?: string;
   name: string;
   email: string;
   phone: string;
   birth: string;
+  nickname?: string;
+  experiences?: any[];  // 구체 타입으로 변경 권장
+  awards?: any[];
+  education?: any[];
+  createdAt?: string | Date;
 }
 
 interface UserContextType {
   user: User | null;
-  login: (name: string, email: string, phone: string, birth: string) => void;
+  login: (userData: User) => void;
   logout: () => void;
 }
 
@@ -37,9 +44,8 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     }
   }, []);
 
-  // 로그인 함수
-  const login = (name: string, email: string, phone: string, birth: string) => {
-    const userData: User = { name, email, phone, birth };
+  // 로그인 함수 (User 전체 객체 받도록 수정)
+  const login = (userData: User) => {
     setUser(userData);
     localStorage.setItem("user", JSON.stringify(userData));
   };
@@ -55,4 +61,12 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       {children}
     </UserContext.Provider>
   );
+};
+
+export const useUserContext = () => {
+  const context = useContext(UserContext);
+  if (!context) {
+    throw new Error("useUserContext must be used within a UserProvider");
+  }
+  return context;
 };
