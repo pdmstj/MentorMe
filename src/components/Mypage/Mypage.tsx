@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useContext } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   Container,
   FixedImage,
@@ -18,7 +18,9 @@ import {
   RemoveButton,
 } from "./Mypage_styles";
 import { Link } from 'react-router-dom'; 
-import { UserContext } from "../../contexts/UserContext";
+import { useUserContext } from "../../contexts/UserContext";
+import { doc, setDoc, getDoc, Timestamp } from "firebase/firestore";
+import { db } from "../../firebase";
 
 import logoImg from "../../image/Mentorme.png";
 import profileDefault from "../../image/ko.jpg";
@@ -29,70 +31,119 @@ type License = {
   date: string;
 };
 
-type Experience = {
+type Education = {
+  school: string;
+  major: string;
+  startYear: string;
+  endYear: string;
+  status: string;
+};
+
+type Career = {
   company: string;
   position: string;
   startDate: string;
   endDate: string;
+  status: string;
 };
 
 type Award = {
-  title: string;
-  organization: string;
+  name: string;
+  issuer: string;
   date: string;
 };
 
-const jobOptions = [
-  '기획·전략', '마케팅·홍보·조사', '회계·세무·재무', '인사·노무·HRD', '총무·법무·사무',
+const jobOptions = ['기획·전략', '마케팅·홍보·조사', '회계·세무·재무', '인사·노무·HRD', '총무·법무·사무',
   'IT개발·데이터', '디자인', '영업·판매·무역', '고객상담·TM', '구매·자재·물류',
   '상품기획·MD', '온라인·운송·배송', '서비스', '생산', '건설·건축', '의료',
-  '연구·R&D', '교육', '미디어·문화·스포츠', '금융·보험', '공공·복지'
-];
-
-const skillOptions = [
-  'React', 'Javascript', 'JAVA', 'CSS', '의사소통',
+  '연구·R&D', '교육', '미디어·문화·스포츠', '금융·보험', '공공·복지'];
+const skillOptions = ['React', 'Javascript', 'JAVA', 'CSS', '의사소통',
   'TypeScript', 'HTML', 'MySQL', 'Redux', '명확성',
   'Git', 'Angular', 'ReactJS', 'AWS', '분석력',
-  'RDBMS', 'JPA', 'Spring Boot', 'Jquery', '경쟁력'
-];
+  'RDBMS', 'JPA', 'Spring Boot', 'Jquery', '경쟁력'];
 
 const Mypage = () => {
-  const { user } = useContext(UserContext);
+  const { user } = useUserContext();
 
-  const [profileImage, setProfileImage] = useState<string>(() => {
-    return localStorage.getItem('profileImage') || profileDefault;
-  });
+  // 디버깅을 위한 로그
+  console.log("Mypage 컴포넌트 렌더링");
+  console.log("현재 user 상태:", user);
+  console.log("user가 존재하는가?", !!user);
+  console.log("user.email이 존재하는가?", !!(user && user.email));
 
-  const [selectedJobs, setSelectedJobs] = useState<string[]>(() => {
-    const saved = localStorage.getItem('selectedJobs');
-    return saved ? JSON.parse(saved) : [];
-  });
+  // 기본 정보
+  const [profileImage, setProfileImage] = useState<string>(profileDefault);
+  const [careerLevel, setCareerLevel] = useState<string>("신입");
+  const [address, setAddress] = useState<string>("");
+  
+  // 선호 정보
+  const [selectedJobs, setSelectedJobs] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-
-  const [selectedSkills, setSelectedSkills] = useState<string[]>(() => {
-    const saved = localStorage.getItem('selectedSkills');
-    return saved ? JSON.parse(saved) : [];
-  });
+  
+  // 기술/스킬
+  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [skillSearchTerm, setSkillSearchTerm] = useState("");
+  
+  // 자격증
+  const [licenses, setLicenses] = useState<License[]>([]);
+  const [showLicenseInputs, setShowLicenseInputs] = useState(false);
+  
+  // 학력
+  const [educations, setEducations] = useState<Education[]>([]);
+  const [showEducationInputs, setShowEducationInputs] = useState(false);
+  
+  // 경력
+  const [careers, setCareers] = useState<Career[]>([]);
+  const [showCareerInputs, setShowCareerInputs] = useState(false);
+  
+  // 수상내역
+  const [awards, setAwards] = useState<Award[]>([]);
+  const [showAwardInputs, setShowAwardInputs] = useState(false);
 
-  const [licenses, setLicenses] = useState<License[]>(() => {
-    const saved = localStorage.getItem('licenses');
-    return saved ? JSON.parse(saved) : [];
-  });
-  const [showInputs, setShowInputs] = useState(licenses.length > 0);
+  // Firebase에서 사용자 데이터 로드
+  useEffect(() => {
+    const loadUserData = async () => {
+      if (!user || !user.email) return;
 
-  // 새로 추가된 상태들
-  const [experiences, setExperiences] = useState<Experience[]>(() => {
-    const saved = localStorage.getItem('experiences');
-    return saved ? JSON.parse(saved) : [];
-  });
-  const [showExperienceInputs, setShowExperienceInputs] = useState(experiences.length > 0);
+      try {
+        // 이메일을 문서 ID로 사용 (특수문자 처리)
+        const docId = user.email.replace(/[@.]/g, '_');
+        const userDocRef = doc(db, "users", docId);
+        const userDoc = await getDoc(userDocRef);
+        
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          
+          // 기존 데이터가 있으면 state에 설정
+          if (userData.jobs) setSelectedJobs(userData.jobs);
+          if (userData.skills) setSelectedSkills(userData.skills);
+          if (userData.licenses) {
+            setLicenses(userData.licenses);
+            setShowLicenseInputs(userData.licenses.length > 0);
+          }
+          if (userData.educations) {
+            setEducations(userData.educations);
+            setShowEducationInputs(userData.educations.length > 0);
+          }
+          if (userData.careers) {
+            setCareers(userData.careers);
+            setShowCareerInputs(userData.careers.length > 0);
+          }
+          if (userData.awards) {
+            setAwards(userData.awards);
+            setShowAwardInputs(userData.awards.length > 0);
+          }
+          if (userData.careerLevel) setCareerLevel(userData.careerLevel);
+          if (userData.address) setAddress(userData.address);
+          if (userData.profileImage) setProfileImage(userData.profileImage);
+        }
+      } catch (error) {
+        console.error("사용자 데이터 로드 실패:", error);
+      }
+    };
 
-  const [awards, setAwards] = useState<Award[]>(() => {
-    const saved = localStorage.getItem('awards');
-    return saved ? JSON.parse(saved) : [];
-  });
-  const [showAwardInputs, setShowAwardInputs] = useState(awards.length > 0);
+    loadUserData();
+  }, [user]);
 
   const handleProfileImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -100,136 +151,172 @@ const Mypage = () => {
       reader.onload = (event) => {
         if (event.target && typeof event.target.result === 'string') {
           setProfileImage(event.target.result);
-          localStorage.setItem('profileImage', event.target.result);
         }
       };
       reader.readAsDataURL(e.target.files[0]);
     }
   };
 
-  const filteredJobs = useMemo(() => {
-    return jobOptions.filter(job =>
+  const filteredJobs = useMemo(() =>
+    jobOptions.filter(job =>
       job.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [searchTerm]);
+    ), [searchTerm]);
 
-  const filteredSkills = useMemo(() => {
-    return skillOptions.filter(skill =>
+  const filteredSkills = useMemo(() =>
+    skillOptions.filter(skill =>
       skill.toLowerCase().includes(skillSearchTerm.toLowerCase())
-    );
-  }, [skillSearchTerm]);
+    ), [skillSearchTerm]);
 
   const toggleJob = (job: string) => {
-    setSelectedJobs(prev => {
-      const updated = prev.includes(job) ? prev.filter(j => j !== job) : [...prev, job];
-      localStorage.setItem('selectedJobs', JSON.stringify(updated));
-      return updated;
-    });
+    setSelectedJobs(prev => 
+      prev.includes(job) ? prev.filter(j => j !== job) : [...prev, job]
+    );
   };
 
   const toggleSkill = (skill: string) => {
-    setSelectedSkills(prev => {
-      const updated = prev.includes(skill) ? prev.filter(s => s !== skill) : [...prev, skill];
-      localStorage.setItem('selectedSkills', JSON.stringify(updated));
+    setSelectedSkills(prev => 
+      prev.includes(skill) ? prev.filter(s => s !== skill) : [...prev, skill]
+    );
+  };
+
+  // 자격증 관련 함수들
+  const handleAddLicense = () => {
+    if (!showLicenseInputs) {
+      setShowLicenseInputs(true);
+    }
+    setLicenses(prev => [...prev, { name: '', issuer: '', date: '' }]);
+  };
+
+  const handleRemoveLicense = (index: number) => {
+    setLicenses(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleLicenseChange = (index: number, field: keyof License, value: string) => {
+    setLicenses(prev => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
       return updated;
     });
   };
 
-  const handleAddClick = () => {
-    setShowInputs(true);
-    const updated = [...licenses, { name: '', issuer: '', date: '' }];
-    setLicenses(updated);
-    localStorage.setItem('licenses', JSON.stringify(updated));
+  // 학력 관련 함수들
+  const handleAddEducation = () => {
+    if (!showEducationInputs) {
+      setShowEducationInputs(true);
+    }
+    setEducations(prev => [...prev, { school: '', major: '', startYear: '', endYear: '', status: '재학중' }]);
   };
 
-  const handleAddLicense = () => {
-    const updated = [...licenses, { name: '', issuer: '', date: '' }];
-    setLicenses(updated);
-    localStorage.setItem('licenses', JSON.stringify(updated));
+  const handleRemoveEducation = (index: number) => {
+    setEducations(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleRemoveLicense = (index: number) => {
-    const updated = [...licenses];
-    updated.splice(index, 1);
-    setLicenses(updated);
-    localStorage.setItem('licenses', JSON.stringify(updated));
+  const handleEducationChange = (index: number, field: keyof Education, value: string) => {
+    setEducations(prev => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
   };
 
-  const handleChange = (index: number, field: string, value: string) => {
-    const updated = [...licenses];
-    updated[index][field] = value;
-    setLicenses(updated);
-    localStorage.setItem('licenses', JSON.stringify(updated));
+  // 경력 관련 함수들
+  const handleAddCareer = () => {
+    if (!showCareerInputs) {
+      setShowCareerInputs(true);
+    }
+    setCareers(prev => [...prev, { company: '', position: '', startDate: '', endDate: '', status: '재직중' }]);
   };
 
-  // 경력 함수들
-  const handleAddExperienceClick = () => {
-    setShowExperienceInputs(true);
-    const updated = [...experiences, { company: '', position: '', startDate: '', endDate: '' }];
-    setExperiences(updated);
-    localStorage.setItem('experiences', JSON.stringify(updated));
+  const handleRemoveCareer = (index: number) => {
+    setCareers(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleAddExperience = () => {
-    const updated = [...experiences, { company: '', position: '', startDate: '', endDate: '' }];
-    setExperiences(updated);
-    localStorage.setItem('experiences', JSON.stringify(updated));
+  const handleCareerChange = (index: number, field: keyof Career, value: string) => {
+    setCareers(prev => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
   };
 
-  const handleRemoveExperience = (index: number) => {
-    const updated = [...experiences];
-    updated.splice(index, 1);
-    setExperiences(updated);
-    localStorage.setItem('experiences', JSON.stringify(updated));
-  };
-
-  const handleExperienceChange = (index: number, field: string, value: string) => {
-    const updated = [...experiences];
-    updated[index][field] = value;
-    setExperiences(updated);
-    localStorage.setItem('experiences', JSON.stringify(updated));
-  };
-
-  // 수상내역 함수들
-  const handleAddAwardClick = () => {
-    setShowAwardInputs(true);
-    const updated = [...awards, { title: '', organization: '', date: '' }];
-    setAwards(updated);
-    localStorage.setItem('awards', JSON.stringify(updated));
-  };
-
+  // 수상내역 관련 함수들
   const handleAddAward = () => {
-    const updated = [...awards, { title: '', organization: '', date: '' }];
-    setAwards(updated);
-    localStorage.setItem('awards', JSON.stringify(updated));
+    if (!showAwardInputs) {
+      setShowAwardInputs(true);
+    }
+    setAwards(prev => [...prev, { name: '', issuer: '', date: '' }]);
   };
 
   const handleRemoveAward = (index: number) => {
-    const updated = [...awards];
-    updated.splice(index, 1);
-    setAwards(updated);
-    localStorage.setItem('awards', JSON.stringify(updated));
+    setAwards(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleAwardChange = (index: number, field: string, value: string) => {
-    const updated = [...awards];
-    updated[index][field] = value;
-    setAwards(updated);
-    localStorage.setItem('awards', JSON.stringify(updated));
+  const handleAwardChange = (index: number, field: keyof Award, value: string) => {
+    setAwards(prev => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
   };
 
-  // 저장하기 버튼 클릭 시 전체 상태 저장 함수
-  const handleSave = () => {
-    localStorage.setItem('selectedJobs', JSON.stringify(selectedJobs));
-    localStorage.setItem('selectedSkills', JSON.stringify(selectedSkills));
-    localStorage.setItem('licenses', JSON.stringify(licenses));
-    localStorage.setItem('experiences', JSON.stringify(experiences));
-    localStorage.setItem('awards', JSON.stringify(awards));
-    alert("저장되었습니다!");
+  const handleSave = async () => {
+    try {
+      // 디버깅을 위한 로그
+      console.log("저장 시도 중...");
+      console.log("user 객체:", user);
+      
+      if (!user || !user.email) {
+        alert("사용자 정보가 없습니다. 다시 로그인해주세요.");
+        return;
+      }
+
+      // 이메일을 문서 ID로 사용 (특수문자 처리)
+      const docId = user.email.replace(/[@.]/g, '_');
+      console.log("Firebase에 저장 중...", docId);
+
+      const userDocRef = doc(db, "users", docId);
+
+      const saveData = {
+        uid: user.uid || docId, // uid가 없으면 docId 사용
+        id: user.id || docId, // id가 없으면 docId 사용
+        name: user.name || "이름 없음",
+        email: user.email || "",
+        phone: user.phone || "",
+        birth: user.birth || "",
+        profileImage,
+        careerLevel,
+        address,
+        jobs: selectedJobs,
+        skills: selectedSkills,
+        licenses: licenses.filter(license => license.name.trim() !== ''), // 빈 항목 제거
+        educations: educations.filter(edu => edu.school.trim() !== ''), // 빈 항목 제거
+        careers: careers.filter(career => career.company.trim() !== ''), // 빈 항목 제거
+        awards: awards.filter(award => award.name.trim() !== ''), // 빈 항목 제거
+        createdAt: user.createdAt || Timestamp.now(),
+        updatedAt: Timestamp.now(),
+      };
+
+      console.log("저장할 데이터:", saveData);
+
+      await setDoc(userDocRef, saveData);
+
+      alert("정보가 성공적으로 저장되었습니다!");
+    } catch (error) {
+      console.error("저장 실패:", error);
+      alert(`저장 중 오류가 발생했습니다: ${error.message}`);
+    }
   };
+
+  if (!user) {
+    return (
+      <Container>
+        <p>로그인이 필요합니다.</p>
+      </Container>
+    );
+  }
 
   return (
-    <>
+   <>
       <Link to="/">
         <FixedImage
           src={logoImg}
@@ -245,30 +332,45 @@ const Mypage = () => {
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "1rem" }}>
                 <h1 style={{ margin: 0, fontSize: "1.6rem" }}>
-                  {user ? user.name : "로그인 필요"}
+                  {user.name}
                 </h1>
-                <Select style={{ minWidth: "140px", marginBottom: 0 }}>
-                  <option>신입</option>
-                  <option>경력</option>
+                <Select 
+                  style={{ minWidth: "140px", marginBottom: 0 }}
+                  value={careerLevel}
+                  onChange={(e) => setCareerLevel(e.target.value)}
+                >
+                  <option value="신입">신입</option>
+                  <option value="경력">경력</option>
                 </Select>
               </div>
-              {user ? (
-                <>
-                  <p>{user.birth} (만 {2025 - parseInt(user.birth.slice(0, 4))}세)</p>
-                  <InfoRow>📧 {user.email}</InfoRow>
-                  <InfoRow>📞 {user.phone}</InfoRow>
-                </>
-              ) : (
-                <p>유저 정보가 없습니다.</p>
-              )}
+              <p>{user.birth} (만 {2025 - parseInt(user.birth.slice(0, 4))}세)</p>
+              <InfoRow>📧 {user.email}</InfoRow>
+              <InfoRow>📞 {user.phone}</InfoRow>
+              <InfoRow>
+                🏠 
+                <input
+                  type="text"
+                  placeholder="주소를 입력하세요"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  style={{
+                    border: 'none',
+                    background: 'transparent',
+                    marginLeft: '8px',
+                    fontSize: 'inherit',
+                    outline: 'none',
+                    borderBottom: '1px solid #ccc',
+                    minWidth: '200px'
+                  }}
+                />
+              </InfoRow>
             </div>
-
             <div>
-              <ProfileImage src={profileImage} alt="프로필 이미지" />
-              <ProfileButton htmlFor="profile-upload">사진 업로드</ProfileButton>
+              <ProfileImage src={profileImage} alt="profile" />
+              <ProfileButton as="label" htmlFor="profileUpload">✏️</ProfileButton>
               <input
-                id="profile-upload"
                 type="file"
+                id="profileUpload"
                 accept="image/*"
                 style={{ display: "none" }}
                 onChange={handleProfileImageChange}
@@ -277,174 +379,231 @@ const Mypage = () => {
           </ProfileSection>
         </Section>
 
-        {/* 2. 희망직무 선택 */}
-        <Section id="job-selection">
-          <Title>희망직무 선택</Title>
-          <input
-            type="text"
-            placeholder="검색어 입력"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+        {/* 2. 선호 정보 섹션 */}
+        <Section id="preference-info">
+          <Title>선호 정보</Title>
+          <div style={{ position: "relative", width: "950px", marginBottom: "10px" }}>
+            <input
+              type="text"
+              placeholder="직업(직무) 또는 전문분야 입력"
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              style={{
+                padding: "12px 48px 12px 16px",
+                border: "1.5px solid #ccc",
+                width: "1000px",
+                fontSize: "1rem",
+                boxSizing: "border-box",
+              }}
+            />
+          </div>
           <JobList>
-            {filteredJobs.map((job) => (
+            {filteredJobs.map(job => (
               <JobItem
                 key={job}
-                $isSelected={selectedJobs.includes(job)}
+                isSelected={selectedJobs.includes(job)}
                 onClick={() => toggleJob(job)}
               >
-                {selectedJobs.includes(job) ? "✔" : "+"} {job}
+                {selectedJobs.includes(job) ? '✔' : '+'} {job}
               </JobItem>
             ))}
           </JobList>
         </Section>
 
-        {/* 3. 보유기술 선택 */}
-        <Section id="skill-selection">
-          <Title>보유기술 선택</Title>
-          <input
-            type="text"
-            placeholder="검색어 입력"
-            value={skillSearchTerm}
-            onChange={(e) => setSkillSearchTerm(e.target.value)}
-          />
+        {/* 3. 지식/기술 섹션 */}
+        <Section id="skill-info">
+          <Title>지식 · 기술</Title>
+          <div style={{ position: "relative", width: "100%", maxWidth: "950px", marginBottom: "20px" }}>
+            <input
+              type="text"
+              placeholder="찾으시는 스킬이 있나요?"
+              value={skillSearchTerm}
+              onChange={e => setSkillSearchTerm(e.target.value)}
+              style={{
+                padding: "12px 48px 12px 16px",
+                border: "1.5px solid #ccc",
+                width: "1000px",
+                fontSize: "1rem",
+                boxSizing: "border-box",
+              }}
+            />
+          </div>
           <SkillList>
-            {filteredSkills.map((skill) => (
+            {filteredSkills.map(skill => (
               <SkillTag
                 key={skill}
-                $isSelected={selectedSkills.includes(skill)}
+                isSelected={selectedSkills.includes(skill)}
                 onClick={() => toggleSkill(skill)}
               >
-                {selectedSkills.includes(skill) ? "✔" : "+"} {skill}
+                {selectedSkills.includes(skill) ? '✔' : '+'} {skill}
               </SkillTag>
             ))}
           </SkillList>
         </Section>
 
-        {/* 4. 자격증 입력 */}
-        <Section id="license-input">
+        {/* 4. 자격증 섹션 */}
+        <Section id="certificate-info">
           <Title>자격증</Title>
-          {showInputs ? (
-            licenses.map((license, index) => (
-              <LicenseInputRow key={index}>
-                <input
-                  type="text"
-                  placeholder="자격증명"
-                  value={license.name}
-                  onChange={(e) => handleChange(index, "name", e.target.value)}
-                />
-                <input
-                  type="text"
-                  placeholder="발행처"
-                  value={license.issuer}
-                  onChange={(e) => handleChange(index, "issuer", e.target.value)}
-                />
-                <input
-                  type="date"
-                  placeholder="취득일"
-                  value={license.date}
-                  onChange={(e) => handleChange(index, "date", e.target.value)}
-                />
-                <RemoveButton onClick={() => handleRemoveLicense(index)}>X</RemoveButton>
-              </LicenseInputRow>
-            ))
-          ) : (
-            <AddLicenseButton onClick={handleAddClick}>+ 자격증 추가</AddLicenseButton>
-          )}
-          {showInputs && <AddLicenseButton onClick={handleAddLicense}>+ 자격증 추가</AddLicenseButton>}
+          {showLicenseInputs && licenses.map((license, index) => (
+            <LicenseInputRow key={index}>
+              <input
+                type="text"
+                placeholder="자격증명"
+                value={license.name}
+                onChange={(e) => handleLicenseChange(index, 'name', e.target.value)}
+              />
+              <input
+                type="text"
+                placeholder="발행처"
+                value={license.issuer}
+                onChange={(e) => handleLicenseChange(index, 'issuer', e.target.value)}
+              />
+              <input
+                type="text"
+                placeholder="취득일"
+                value={license.date}
+                onChange={(e) => handleLicenseChange(index, 'date', e.target.value)}
+              />
+              <RemoveButton onClick={() => handleRemoveLicense(index)}>✕</RemoveButton>
+            </LicenseInputRow>
+          ))}
+          <AddLicenseButton onClick={handleAddLicense}>
+            + 자격증 추가
+          </AddLicenseButton>
         </Section>
 
-      <Section id="education-info">
-        <Title>학력</Title>
-        <LicenseInputRow>
-          <input type="text" placeholder="학교명" />
-          <input type="text" placeholder="전공" />
-          <input type="text" placeholder="입학년도 (예: 2021)" />
-          <input type="text" placeholder="졸업년도 (예: 2025)" />
-          <Select>
-            <option>재학중</option>
-            <option>졸업</option>
-            <option>중퇴</option>
-          </Select>
-        </LicenseInputRow>
-      </Section>
+        {/* 5. 학력 */}
+        <Section id="education-info">
+          <Title>학력</Title>
+          {showEducationInputs && educations.map((education, index) => (
+            <LicenseInputRow key={index}>
+              <input 
+                type="text" 
+                placeholder="학교명" 
+                value={education.school}
+                onChange={(e) => handleEducationChange(index, 'school', e.target.value)}
+              />
+              <input 
+                type="text" 
+                placeholder="전공" 
+                value={education.major}
+                onChange={(e) => handleEducationChange(index, 'major', e.target.value)}
+              />
+              <input 
+                type="text" 
+                placeholder="입학년도 (예: 2021)" 
+                value={education.startYear}
+                onChange={(e) => handleEducationChange(index, 'startYear', e.target.value)}
+              />
+              <input 
+                type="text" 
+                placeholder="졸업년도 (예: 2025)" 
+                value={education.endYear}
+                onChange={(e) => handleEducationChange(index, 'endYear', e.target.value)}
+              />
+              <Select 
+                value={education.status}
+                onChange={(e) => handleEducationChange(index, 'status', e.target.value)}
+              >
+                <option value="재학중">재학중</option>
+                <option value="졸업">졸업</option>
+                <option value="중퇴">중퇴</option>
+              </Select>
+              <RemoveButton onClick={() => handleRemoveEducation(index)}>✕</RemoveButton>
+            </LicenseInputRow>
+          ))}
+          <AddLicenseButton onClick={handleAddEducation}>+ 학력 추가</AddLicenseButton>
+        </Section>
 
-        {/* 5. 경력 입력 */}
-        <Section id="experience-input">
+        {/* 6. 경력 */}
+        <Section id="career-info">
           <Title>경력</Title>
-          {showExperienceInputs ? (
-            experiences.map((exp, index) => (
-              <LicenseInputRow key={index}>
-                <input
-                  type="text"
-                  placeholder="회사명"
-                  value={exp.company}
-                  onChange={(e) => handleExperienceChange(index, "company", e.target.value)}
-                />
-                <input
-                  type="text"
-                  placeholder="직책"
-                  value={exp.position}
-                  onChange={(e) => handleExperienceChange(index, "position", e.target.value)}
-                />
-                <input
-                  type="date"
-                  placeholder="시작일"
-                  value={exp.startDate}
-                  onChange={(e) => handleExperienceChange(index, "startDate", e.target.value)}
-                />
-                <input
-                  type="date"
-                  placeholder="종료일"
-                  value={exp.endDate}
-                  onChange={(e) => handleExperienceChange(index, "endDate", e.target.value)}
-                />
-                <RemoveButton onClick={() => handleRemoveExperience(index)}>X</RemoveButton>
-              </LicenseInputRow>
-            ))
-          ) : (
-            <AddLicenseButton onClick={handleAddExperienceClick}>+ 경력 추가</AddLicenseButton>
-          )}
-          {showExperienceInputs && <AddLicenseButton onClick={handleAddExperience}>+ 경력 추가</AddLicenseButton>}
+          {showCareerInputs && careers.map((career, index) => (
+            <LicenseInputRow key={index}>
+              <input 
+                type="text" 
+                placeholder="회사명" 
+                value={career.company}
+                onChange={(e) => handleCareerChange(index, 'company', e.target.value)}
+              />
+              <input 
+                type="text" 
+                placeholder="직무" 
+                value={career.position}
+                onChange={(e) => handleCareerChange(index, 'position', e.target.value)}
+              />
+              <input 
+                type="text" 
+                placeholder="입사일 (예: 2022.01)" 
+                value={career.startDate}
+                onChange={(e) => handleCareerChange(index, 'startDate', e.target.value)}
+              />
+              <input 
+                type="text" 
+                placeholder="퇴사일 (예: 2024.12)" 
+                value={career.endDate}
+                onChange={(e) => handleCareerChange(index, 'endDate', e.target.value)}
+              />
+              <Select 
+                value={career.status}
+                onChange={(e) => handleCareerChange(index, 'status', e.target.value)}
+              >
+                <option value="재직중">재직중</option>
+                <option value="퇴사">퇴사</option>
+              </Select>
+              <RemoveButton onClick={() => handleRemoveCareer(index)}>✕</RemoveButton>
+            </LicenseInputRow>
+          ))}
+          <AddLicenseButton onClick={handleAddCareer}>+ 경력 추가</AddLicenseButton>
         </Section>
 
-        {/* 6. 수상내역 입력 */}
-        <Section id="award-input">
+        {/* 7. 수상내역 */}
+        <Section id="award-info">
           <Title>수상내역</Title>
-          {showAwardInputs ? (
-            awards.map((award, index) => (
-              <LicenseInputRow key={index}>
-                <input
-                  type="text"
-                  placeholder="제목"
-                  value={award.title}
-                  onChange={(e) => handleAwardChange(index, "title", e.target.value)}
-                />
-                <input
-                  type="text"
-                  placeholder="기관"
-                  value={award.organization}
-                  onChange={(e) => handleAwardChange(index, "organization", e.target.value)}
-                />
-                <input
-                  type="date"
-                  placeholder="수상일"
-                  value={award.date}
-                  onChange={(e) => handleAwardChange(index, "date", e.target.value)}
-                />
-                <RemoveButton onClick={() => handleRemoveAward(index)}>X</RemoveButton>
-              </LicenseInputRow>
-            ))
-          ) : (
-            <AddLicenseButton onClick={handleAddAwardClick}>+ 수상내역 추가</AddLicenseButton>
-          )}
-          {showAwardInputs && <AddLicenseButton onClick={handleAddAward}>+ 수상내역 추가</AddLicenseButton>}
+          {showAwardInputs && awards.map((award, index) => (
+            <LicenseInputRow key={index}>
+              <input 
+                type="text" 
+                placeholder="수상명" 
+                value={award.name}
+                onChange={(e) => handleAwardChange(index, 'name', e.target.value)}
+              />
+              <input 
+                type="text" 
+                placeholder="발급 기관" 
+                value={award.issuer}
+                onChange={(e) => handleAwardChange(index, 'issuer', e.target.value)}
+              />
+              <input 
+                type="text" 
+                placeholder="수상일 (예: 2023.05)" 
+                value={award.date}
+                onChange={(e) => handleAwardChange(index, 'date', e.target.value)}
+              />
+              <RemoveButton onClick={() => handleRemoveAward(index)}>✕</RemoveButton>
+            </LicenseInputRow>
+          ))}
+          <AddLicenseButton onClick={handleAddAward}>+ 수상내역 추가</AddLicenseButton>
         </Section>
 
-        {/* 저장 버튼 */}
-        <Section>
-          <button onClick={handleSave}>저장하기</button>
+        {/* 저장하기 버튼 */}
+        <Section style={{ textAlign: "center", marginTop: "30px" }}>
+          <AddLicenseButton
+            onClick={handleSave}
+            style={{
+              backgroundColor: '#6482ED',
+              color: 'white',
+              padding: '12px 24px',
+              fontSize: '1rem',
+              borderRadius: '12px',
+              border: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            저장하기
+          </AddLicenseButton>
         </Section>
+
       </Container>
     </>
   );
