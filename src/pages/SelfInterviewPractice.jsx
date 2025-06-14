@@ -102,54 +102,57 @@ const SelfInterviewPractice = () => {
 
         // 녹화 중지 시 처리
         mediaRecorder.onstop = async () => {
-          setLoading(true); // 분석 시작 표시
-          // 녹화 데이터 Blob 생성
+          setLoading(true);
           const blob = new Blob(chunksRef.current, { type: 'video/webm' });
           setRecordedBlob(blob);
           const videoUrl = URL.createObjectURL(blob);
           const file = new File([blob], 'interview.webm', { type: 'video/webm' });
-
-          // 서버에 업로드할 폼데이터 생성
+        
           const formData = new FormData();
           formData.append('file', file);
-
+        
           try {
-            // 1. 영상 저장 서버에 POST
+            // 1. 영상 업로드
             const saveRes = await fetch('http://localhost:5000/upload', {
               method: 'POST',
               body: formData
             });
-
+        
             if (!saveRes.ok) throw new Error("영상 저장 실패");
             const saveResult = await saveRes.json();
-            console.log("영상 저장 성공:", saveResult);
-
-            // 2. STT 서버에 영상 보내어 텍스트 변환 요청
-            const sttRes = await fetch('http://localhost:8000/stt/', {
+            console.log("🎥 영상 저장 성공:", saveResult);
+        
+            const uploadedFilename = saveResult.path.split("/").pop(); // 파일명만 추출
+        
+            // 2. /analyze API 호출 (STT + 표정/자세)
+            const analyzeRes = await fetch('http://localhost:5001/analyze', {
               method: 'POST',
-              body: formData
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ filename: uploadedFilename })
             });
-
-            const sttData = await sttRes.json();
-            console.log("STT 결과:", sttData.text);
-
-            // 3. 피드백 페이지로 이동, 필요한 데이터 함께 전달
+        
+            if (!analyzeRes.ok) throw new Error("분석 실패");
+            const analyzeResult = await analyzeRes.json();
+            console.log("🧠 분석 결과:", analyzeResult);
+        
+            // 3. 피드백 페이지로 이동
             navigate('/feedback', {
               state: {
-                videoUrl,               // 영상 미리보기용 URL
-                sttText: sttData.text,  // STT 결과 텍스트
-                type: 'self',           // 인터뷰 타입 구분
-                savedPath: saveResult.path // 서버 저장 경로 (추후 분석용)
+                videoUrl,
+                sttText: analyzeResult.text,
+                expressionResult: JSON.stringify(analyzeResult.frames, null, 2), // 추후 가공 가능
+                type: 'self',
+                savedPath: saveResult.path
               }
             });
+        
           } catch (error) {
-            console.error('저장 또는 STT 에러:', error);
-            alert('영상 저장 또는 분석 중 오류가 발생했습니다.');
+            console.error("🎯 분석 중 에러:", error);
+            alert("영상 저장 또는 분석 중 오류가 발생했습니다.");
           }
-
-          // 카메라 스트림 모두 정리(중지)
+        
           stream.getTracks().forEach((track) => track.stop());
-        };
+        };        
 
         mediaRecorder.start(); // 녹화 시작
         setRecording(true);    // 녹화 상태 true로 변경
