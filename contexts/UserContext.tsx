@@ -1,98 +1,99 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
 
-// User 및 License 타입 정의
+// 학력 타입 정의
+type Education = {
+  school: string;
+  major: string;
+  startYear: string;
+  endYear: string;
+  status: string; // 예: '재학중', '졸업', '중퇴'
+};
+
 type License = {
   name: string;
+  issuer: string;
   date: string;
 };
 
-type User = {
-  id: string;
-  nickname: string;
+export type User = {
+  name: string;
   email: string;
-  job: string;
-  jobs: string[];
-  skill: string;
-  skills: string[];
-  licenses: License[];
-  profileImage: string;
+  phone: string;
+  birth: string;
+  // 필요한 다른 필드는 optional로 둬도 됨
+  uid?: string;
+  id?: string;
+  nickname?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  jobs?: string[];
+  skills?: string[];
+  licenses?: License[];
+  experiences?: string[];
+  awards?: string[];
+  education?: Education;
 };
 
-// 기본 사용자 객체
-const defaultUser: User = {
-  id: "",
-  nickname: "",
-  email: "",
-  job: "",
-  jobs: [],
-  skill: "",
-  skills: [],
-  licenses: [],
-  profileImage: "",
-};
 
-// Context 타입 정의
+
 type UserContextType = {
   user: User | null;
-  setUser: (user: User) => Promise<void>;
-  updateNickname: (nickname: string) => void;
-  updateJobs: (jobs: string[]) => void;
-  updateSkills: (skills: string[]) => void;
-  updateLicenses: (licenses: License[]) => void;
-  updateProfileImage: (url: string) => void;
+  updateUser: (user: User) => void;
+  updateField: <K extends keyof User>(key: K, value: User[K]) => void;
+  clearUser: () => void;
 };
 
-// Context 생성
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-// Provider 컴포넌트
-export const UserProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUserState] = useState<User | null>(null);
+export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
 
-  const setUser = async (newUser: User) => {
-    setUserState(newUser);
+  // localStorage에서 유저 정보 불러오기
+  useEffect(() => {
+    const savedUser = localStorage.getItem("user");
+    if (savedUser) {
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch {
+        localStorage.removeItem("user");
+      }
+    }
+  }, []);
+
+  // user 상태 변화 시 콘솔에 출력 (디버깅 용도)
+  useEffect(() => {
+    console.log("Current user in context:", user);
+  }, [user]);
+
+  // 전체 user 정보 업데이트
+  const updateUser = (newUser: User) => {
+    setUser(newUser);
+    localStorage.setItem("user", JSON.stringify(newUser));
   };
 
-  const updateNickname = (nickname: string) => {
-    if (user) {
-      setUserState({ ...user, nickname });
-    }
+  // user의 특정 필드만 업데이트
+  const updateField = <K extends keyof User>(key: K, value: User[K]) => {
+    setUser((prevUser) => {
+      if (!prevUser) return prevUser;
+      const updatedUser = { ...prevUser, [key]: value };
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      return updatedUser;
+    });
   };
 
-  const updateJobs = (jobs: string[]) => {
-    if (user) {
-      setUserState({ ...user, jobs });
-    }
-  };
-
-  const updateSkills = (skills: string[]) => {
-    if (user) {
-      setUserState({ ...user, skills });
-    }
-  };
-
-  const updateLicenses = (licenses: License[]) => {
-    if (user) {
-      setUserState({ ...user, licenses });
-    }
-  };
-
-  const updateProfileImage = (url: string) => {
-    if (user) {
-      setUserState({ ...user, profileImage: url });
-    }
+  // user 초기화
+  const clearUser = () => {
+    setUser(null);
+    localStorage.removeItem("user");
   };
 
   return (
     <UserContext.Provider
       value={{
         user,
-        setUser,
-        updateNickname,
-        updateJobs,
-        updateSkills,
-        updateLicenses,
-        updateProfileImage,
+        updateUser,
+        updateField,
+        clearUser,
       }}
     >
       {children}
@@ -100,11 +101,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// 커스텀 훅
-export const useUser = (): UserContextType => {
+// 커스텀 훅으로 UserContext 사용 편리하게
+export const useUserContext = (): UserContextType => {
   const context = useContext(UserContext);
-  if (context === undefined) {
-    throw new Error("useUser must be used within a UserProvider");
-  }
+  if (!context) throw new Error("useUserContext must be used within a UserProvider");
   return context;
 };

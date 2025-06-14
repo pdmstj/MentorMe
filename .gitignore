@@ -29,3 +29,5 @@ stt_server/__pycache__/
 /venv
 
 Backend/uploads
+
+.env
