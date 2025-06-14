@@ -1,3 +1,4 @@
+/* 마이페이지 컨테이너 */
 .mypage-container {
   padding: 20px;
   font-family: 'Pretendard', sans-serif;
@@ -35,6 +36,8 @@
   width: 220px;
   display: flex;
   flex-direction: column;
+  flex-shrink: 0; /* 사이즈 고정 */
+  height: fit-content; /* 내용에 맞게만 높이 지정 */
 }
 
 .sidebar-title {
@@ -108,18 +111,15 @@
   width: 34px;
   height: 20px;
 }
-
 .switch input { display: none; }
 
 .slider {
   position: absolute;
-  top: 0; left: 0;
-  right: 0; bottom: 0;
+  top: 0; left: 0; right: 0; bottom: 0;
   background-color: #ccc;
   border-radius: 34px;
   transition: .4s;
 }
-
 .slider:before {
   position: absolute;
   content: "";
@@ -131,15 +131,12 @@
   transition: .4s;
   border-radius: 50%;
 }
-
 input:checked + .slider {
   background-color: #6482ed;
 }
-
 input:checked + .slider:before {
   transform: translateX(14px);
 }
-
 .toggle-text {
   font-size: 14px;
 }
@@ -177,6 +174,8 @@ input:checked + .slider:before {
   background-color: #f9f9f9;
   padding: 20px;
   border-radius: 10px;
+  max-height: 480px;
+  overflow-y: auto; /* ✅ 내부만 스크롤 되도록 */
 }
 
 .interview-title {
@@ -188,6 +187,7 @@ input:checked + .slider:before {
 
 .interview-cards {
   display: flex;
+  flex-wrap: wrap;
   gap: 20px;
 }
 
@@ -225,4 +225,3 @@ input:checked + .slider:before {
   width: auto;
   object-fit: contain;
 }
-
