@@ -140,7 +140,7 @@ const SelfInterviewPractice = () => {
               state: {
                 videoUrl,
                 sttText: analyzeResult.text,
-                expressionResult: JSON.stringify(analyzeResult.frames, null, 2), // 추후 가공 가능
+                expressionResult: { frames: analyzeResult.frames }, 
                 type: 'self',
                 savedPath: saveResult.path
               }

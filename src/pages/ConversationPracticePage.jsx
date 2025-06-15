@@ -133,7 +133,7 @@ const SelfInterviewPracticeStyled = () => {
               state: {
                 videoUrl,
                 sttText: analyzeResult.text,
-                expressionResult: JSON.stringify(analyzeResult.frames, null, 2),
+                expressionResult: { frames: analyzeResult.frames }, 
                 type: 'self',
               },
             });
