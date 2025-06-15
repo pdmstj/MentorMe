@@ -136,12 +136,14 @@ const SelfInterviewPractice = () => {
             console.log("🧠 분석 결과:", analyzeResult);
         
             // 3. 피드백 페이지로 이동
+            const username = localStorage.getItem("username");
             navigate('/feedback', {
               state: {
                 videoUrl,
                 sttText: analyzeResult.text,
                 expressionResult: { frames: analyzeResult.frames }, 
                 type: 'self',
+                user: username, 
                 savedPath: saveResult.path
               }
             });

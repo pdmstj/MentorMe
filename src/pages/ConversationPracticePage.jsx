@@ -129,12 +129,14 @@ const SelfInterviewPracticeStyled = () => {
             const analyzeResult = await analyzeRes.json();
         
             // 3. 이동
+            const username = localStorage.getItem("username");
             navigate('/feedback', {
               state: {
                 videoUrl,
                 sttText: analyzeResult.text,
                 expressionResult: { frames: analyzeResult.frames }, 
                 type: 'self',
+                user: username, 
               },
             });
         
