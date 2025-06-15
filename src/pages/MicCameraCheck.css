@@ -128,32 +128,30 @@ h2 {
 
 .header-container {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start; /* ✅ 왼쪽 정렬 */
   align-items: center;
-  padding: 16px;
-  position: relative;
+  padding: 16px 40px;  /* 여백 추가 */
   background-color: white;
 }
 
 .title-box {
   display: flex;
   align-items: center;
+  gap: 12px; /* ✅ 로고와 텍스트 사이 간격 자연스럽게 */
 }
 
 .title-logo {
-  margin-top: 5px;
-  margin-right: 35px;
-  width: 100px;
-  height: 30px;
+  width: 110px;
+  height: auto;
 }
 
 .logo-img {
-  height: 25px; 
-  width: auto;
+  height: 32px;
   object-fit: contain;
 }
 
 .title-text {
+  font-size: 16px;       /* ✅ 조금 더 잘 보이게 */
+  font-weight: 500;
   color: #333;
-  font-size: 14px;
 }

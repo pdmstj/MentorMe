@@ -8,6 +8,9 @@ import InterviewMain from './pages/InterviewMain';
 import MicCameraCheck from './pages/MicCameraCheck';
 import "slick-carousel/slick/slick.css"; 
 import "slick-carousel/slick/slick-theme.css";
+import SettingPage from './components/Mypage/setting';
+import Record from './components/Mypage/Record';
+
 
 // Context 추가
 import { UserProvider } from './contexts/UserContext'; // <-- 추가
@@ -51,6 +54,8 @@ const App = () => {
           {/* 마이페이지 */}
           <Route path="/mypage-main" element={<MypageMain />} />
           <Route path="/mypage" element={<Mypage />} />
+          <Route path="/setting" element={<SettingPage />} />   
+          <Route path="/record" element={<Record />} />   
 
           {/* 회사 추천 */}
           <Route path="/recommend" element={<Recommend />} />
