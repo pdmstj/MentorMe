@@ -1,11 +1,13 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import './MypageMain.css';
 import { UserContext } from '../../contexts/UserContext';
 import logoImg from '../../image/mentorme_logo.png';
+import MypageTabs from '../../components/MypageTabs';
 
 const MypageMain = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useContext(UserContext);
   const [videos, setVideos] = useState<string[]>([]);
 
@@ -32,21 +34,17 @@ const MypageMain = () => {
 
   return (
     <div className="mypage-container">
-      {/* ✅ Header와 동일한 구조로 로고 추가 */}
       <div className="mypage-header">
         <Link to="/" className="logo">
           <img src={logoImg} alt="로고" className="logo-img" />
         </Link>
       </div>
 
-      <div className="mypage-menu">
-        <div className="menu-item active">프로필</div>
-        <div className="menu-item">모의면접 기록</div>
-        <div className="menu-item">설정</div>
-      </div>
+    <MypageTabs /> {/* ✅ 로고 아래, 사이드바 위쪽으로 탭 이동 */}
 
       <div className="mypage-content">
         <div className="mypage-sidebar">
+          
           <div className="sidebar-title">마이페이지</div>
           <button className="recommend-msg" onClick={() => alert('추천 기능 준비 중!')}>
             기업 추천을 받을 수 있어요.
