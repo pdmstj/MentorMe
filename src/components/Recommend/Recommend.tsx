@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState, useMemo } from "react";
 import Slider from "react-slick";
 import { auth } from "../../firebase";
 import { onAuthStateChanged, User } from "firebase/auth";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 import companiesRaw from "../../data/companies.json";
 
 import {
@@ -34,6 +35,36 @@ interface CompanyType {
   heartCount?: number;
 }
 
+// 🔑 세부 직무 → 상위 직무 매핑 테이블
+const jobMapping: Record<string, string> = {
+  "기획·전략": "기획",
+  "마케팅·홍보·조사": "기획",
+  "상품기획·MD": "기획",
+  "고객상담·TM": "기획",
+  "구매·자재·물류": "기획",
+  "온라인·운송·배송": "기획",
+
+  "회계·세무·재무": "회계",
+  "인사·노무·HRD": "회계",
+  "총무·법무·사무": "회계",
+  "금융·보험": "회계",
+  "서비스": "회계",
+  "생산": "회계",
+
+  "IT개발·데이터": "IT개발",
+
+  "디자인": "디자인",
+  "미디어·문화·스포츠": "디자인",
+
+  "의료": "의료",
+  "연구·R&D": "의료",
+  "교육": "의료",
+  "공공·복지": "의료",
+
+  "영업·판매·무역": "영업",
+  "건설·건축": "건설"
+};
+
 const sliderSettings = {
   dots: false,
   infinite: false,
@@ -46,30 +77,54 @@ const sliderSettings = {
 const Recommend: React.FC = () => {
   const sliderRef = useRef<Slider>(null);
   const [userName, setUserName] = useState<string>("사용자");
+  const [userJobCategories, setUserJobCategories] = useState<string[]>([]);
   const [filteredCompanies, setFilteredCompanies] = useState<CompanyType[]>([]);
+  const db = getFirestore();
 
-  // ✅ 고정된 회사 데이터
   const allCompanies: CompanyType[] = useMemo(() => {
     const companiesData = companiesRaw as Record<string, CompanyType[]>;
     return Object.values(companiesData).flat();
   }, []);
 
-  // ✅ 관심 직무 배열도 useMemo로 고정
-  const userJobCategories = useMemo(() => ["IT개발", "디자인"], []);
-
-  // 사용자 이름 가져오기
+  // 사용자 정보 + 상위 job category 추출
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user: User | null) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user: User | null) => {
       if (user) {
         setUserName(user.displayName || user.email?.split("@")[0] || "사용자");
+
+        try {
+          const userDocId = user.email?.replace(/[@.]/g, "_");
+          if (!userDocId) return;
+
+          const userDocRef = doc(db, "users", userDocId);
+          const userDocSnap = await getDoc(userDocRef);
+
+          if (userDocSnap.exists()) {
+            const userData = userDocSnap.data();
+            if (Array.isArray(userData.jobs)) {
+              const mappedJobs = [
+                ...new Set(
+                  userData.jobs
+                    .map((job: string) => jobMapping[job])
+                    .filter((job): job is string => !!job)
+                )
+              ];
+              setUserJobCategories(mappedJobs);
+            }
+          }
+        } catch (error) {
+          console.error("사용자 데이터 불러오기 오류:", error);
+        }
       } else {
         setUserName("사용자");
+        setUserJobCategories([]);
       }
     });
+
     return () => unsubscribe();
   }, []);
 
-  // 필터링 로직 (무한 루프 방지됨)
+  // 추천 기업 필터링
   useEffect(() => {
     const filtered = allCompanies.filter(company =>
       company.jobCategories.some(cat => userJobCategories.includes(cat))
