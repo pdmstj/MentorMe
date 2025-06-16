@@ -79,10 +79,12 @@ const Mypage = () => {
   // 선호 정보
   const [selectedJobs, setSelectedJobs] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [customJobs, setCustomJobs] = useState<string[]>([]); // 사용자가 추가한 직업
   
   // 기술/스킬
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [skillSearchTerm, setSkillSearchTerm] = useState("");
+  const [customSkills, setCustomSkills] = useState<string[]>([]); // 사용자가 추가한 스킬
   
   // 자격증
   const [licenses, setLicenses] = useState<License[]>([]);
@@ -117,6 +119,8 @@ const Mypage = () => {
           // 기존 데이터가 있으면 state에 설정
           if (userData.jobs) setSelectedJobs(userData.jobs);
           if (userData.skills) setSelectedSkills(userData.skills);
+          if (userData.customJobs) setCustomJobs(userData.customJobs);
+          if (userData.customSkills) setCustomSkills(userData.customSkills);
           if (userData.licenses) {
             setLicenses(userData.licenses);
             setShowLicenseInputs(userData.licenses.length > 0);
@@ -157,15 +161,21 @@ const Mypage = () => {
     }
   };
 
+  // 모든 직업 옵션 (기본 + 사용자 추가)
+  const allJobOptions = useMemo(() => [...jobOptions, ...customJobs], [customJobs]);
+  
+  // 모든 스킬 옵션 (기본 + 사용자 추가)
+  const allSkillOptions = useMemo(() => [...skillOptions, ...customSkills], [customSkills]);
+
   const filteredJobs = useMemo(() =>
-    jobOptions.filter(job =>
+    allJobOptions.filter(job =>
       job.toLowerCase().includes(searchTerm.toLowerCase())
-    ), [searchTerm]);
+    ), [searchTerm, allJobOptions]);
 
   const filteredSkills = useMemo(() =>
-    skillOptions.filter(skill =>
+    allSkillOptions.filter(skill =>
       skill.toLowerCase().includes(skillSearchTerm.toLowerCase())
-    ), [skillSearchTerm]);
+    ), [skillSearchTerm, allSkillOptions]);
 
   const toggleJob = (job: string) => {
     setSelectedJobs(prev => 
@@ -177,6 +187,41 @@ const Mypage = () => {
     setSelectedSkills(prev => 
       prev.includes(skill) ? prev.filter(s => s !== skill) : [...prev, skill]
     );
+  };
+
+  // 새로운 직업 추가 함수
+  const handleAddCustomJob = () => {
+    const trimmedJob = searchTerm.trim();
+    if (trimmedJob && !allJobOptions.includes(trimmedJob)) {
+      setCustomJobs(prev => [...prev, trimmedJob]);
+      setSelectedJobs(prev => [...prev, trimmedJob]);
+      setSearchTerm("");
+    }
+  };
+
+  // 새로운 스킬 추가 함수
+  const handleAddCustomSkill = () => {
+    const trimmedSkill = skillSearchTerm.trim();
+    if (trimmedSkill && !allSkillOptions.includes(trimmedSkill)) {
+      setCustomSkills(prev => [...prev, trimmedSkill]);
+      setSelectedSkills(prev => [...prev, trimmedSkill]);
+      setSkillSearchTerm("");
+    }
+  };
+
+  // Enter 키 처리 함수
+  const handleJobKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddCustomJob();
+    }
+  };
+
+  const handleSkillKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddCustomSkill();
+    }
   };
 
   // 자격증 관련 함수들
@@ -288,6 +333,8 @@ const Mypage = () => {
         address,
         jobs: selectedJobs,
         skills: selectedSkills,
+        customJobs, // 사용자가 추가한 직업 목록
+        customSkills, // 사용자가 추가한 스킬 목록
         licenses: licenses.filter(license => license.name.trim() !== ''), // 빈 항목 제거
         educations: educations.filter(edu => edu.school.trim() !== ''), // 빈 항목 제거
         careers: careers.filter(career => career.company.trim() !== ''), // 빈 항목 제거
@@ -382,20 +429,41 @@ const Mypage = () => {
         {/* 2. 선호 정보 섹션 */}
         <Section id="preference-info">
           <Title>선호 정보</Title>
-          <div style={{ position: "relative", width: "950px", marginBottom: "10px" }}>
-            <input
-              type="text"
-              placeholder="직업(직무) 또는 전문분야 입력"
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
+            <div style={{ position: "relative", flex: 1 }}>
+              <input
+                type="text"
+                placeholder="직업(직무) 또는 전문분야 입력"
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                onKeyPress={handleJobKeyPress}
+                style={{
+                  padding: "12px 16px",
+                  border: "1.5px solid #ccc",
+                  width: "100%",
+                  fontSize: "1rem",
+                  boxSizing: "border-box",
+                  borderRadius: "4px",
+                }}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={handleAddCustomJob}
+              disabled={!searchTerm.trim() || allJobOptions.includes(searchTerm.trim())}
               style={{
-                padding: "12px 48px 12px 16px",
-                border: "1.5px solid #ccc",
-                width: "1000px",
+                padding: "12px 20px",
+                backgroundColor: !searchTerm.trim() || allJobOptions.includes(searchTerm.trim()) ? "#ccc" : "#6482ED",
+                color: "white",
+                border: "none",
+                borderRadius: "4px",
+                cursor: !searchTerm.trim() || allJobOptions.includes(searchTerm.trim()) ? "not-allowed" : "pointer",
                 fontSize: "1rem",
-                boxSizing: "border-box",
+                whiteSpace: "nowrap",
               }}
-            />
+            >
+              추가
+            </button>
           </div>
           <JobList>
             {filteredJobs.map(job => (
@@ -405,6 +473,7 @@ const Mypage = () => {
                 onClick={() => toggleJob(job)}
               >
                 {selectedJobs.includes(job) ? '✔' : '+'} {job}
+                {customJobs.includes(job) && <span style={{ color: '#6482ED', fontSize: '0.8em' }}> (직접추가)</span>}
               </JobItem>
             ))}
           </JobList>
@@ -413,20 +482,41 @@ const Mypage = () => {
         {/* 3. 지식/기술 섹션 */}
         <Section id="skill-info">
           <Title>지식 · 기술</Title>
-          <div style={{ position: "relative", width: "100%", maxWidth: "950px", marginBottom: "20px" }}>
-            <input
-              type="text"
-              placeholder="찾으시는 스킬이 있나요?"
-              value={skillSearchTerm}
-              onChange={e => setSkillSearchTerm(e.target.value)}
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "20px" }}>
+            <div style={{ position: "relative", flex: 1 }}>
+              <input
+                type="text"
+                placeholder="찾으시는 스킬이 있나요?"
+                value={skillSearchTerm}
+                onChange={e => setSkillSearchTerm(e.target.value)}
+                onKeyPress={handleSkillKeyPress}
+                style={{
+                  padding: "12px 16px",
+                  border: "1.5px solid #ccc",
+                  width: "100%",
+                  fontSize: "1rem",
+                  boxSizing: "border-box",
+                  borderRadius: "4px",
+                }}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={handleAddCustomSkill}
+              disabled={!skillSearchTerm.trim() || allSkillOptions.includes(skillSearchTerm.trim())}
               style={{
-                padding: "12px 48px 12px 16px",
-                border: "1.5px solid #ccc",
-                width: "1000px",
+                padding: "12px 20px",
+                backgroundColor: !skillSearchTerm.trim() || allSkillOptions.includes(skillSearchTerm.trim()) ? "#ccc" : "#6482ED",
+                color: "white",
+                border: "none",
+                borderRadius: "4px",
+                cursor: !skillSearchTerm.trim() || allSkillOptions.includes(skillSearchTerm.trim()) ? "not-allowed" : "pointer",
                 fontSize: "1rem",
-                boxSizing: "border-box",
+                whiteSpace: "nowrap",
               }}
-            />
+            >
+              추가
+            </button>
           </div>
           <SkillList>
             {filteredSkills.map(skill => (
@@ -436,6 +526,7 @@ const Mypage = () => {
                 onClick={() => toggleSkill(skill)}
               >
                 {selectedSkills.includes(skill) ? '✔' : '+'} {skill}
+                {customSkills.includes(skill) && <span style={{ color: '#6482ED', fontSize: '0.8em' }}> (직접추가)</span>}
               </SkillTag>
             ))}
           </SkillList>
