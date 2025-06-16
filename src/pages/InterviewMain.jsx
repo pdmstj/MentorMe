@@ -14,7 +14,11 @@ export default function InterviewMain() {
   };
 
   const handleGoToRecommend = () => {
-    navigate('/recommend'); // ⭐ 회사추천 클릭 시 /recommend 이동
+    navigate('/recommend'); // 회사추천 페이지로 이동
+  };
+
+  const handleGoToRecord = () => {
+    navigate('/record'); // 최근면접 페이지로 이동
   };
 
   return (
@@ -31,12 +35,11 @@ export default function InterviewMain() {
 
         {/* 최근 면접 & 회사추천 */}
         <div className="card-container">
-          <div className="card">
+          <div className="card" onClick={handleGoToRecord} style={{ cursor: 'pointer' }}>
             <img src={recentImg} alt="최근면접" className="card-image" />
             <div className="card-title">최근면접</div>
           </div>
 
-          {/* 🔥 회사추천 카드 클릭 시 이동하도록 */}
           <div className="card" onClick={handleGoToRecommend} style={{ cursor: 'pointer' }}>
             <img src={companyImg} alt="회사추천" className="card-image" />
             <div className="card-title">회사추천</div>
