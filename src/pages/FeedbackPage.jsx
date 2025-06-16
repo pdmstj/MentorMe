@@ -159,43 +159,106 @@ const FeedbackPage = () => {
             )}
 
             {/* 📸 표정/자세 분석 결과 */}
-            {expressionFrames?.length > 0 && (
-              <div className="feedback-item">
-                <h4 className="feedback-heading">😃 표정 및 자세 분석 종합 요약</h4>
-                <p className="feedback-text">
-                  전체 면접 영상 중 <strong>{expressionFrames.filter(f => f.face_detected).length}</strong>개의 구간에서 얼굴이 정확히 인식되었습니다.<br />
-                  자세 안정도 평균은 <strong>{
-                    Math.round(expressionFrames.reduce((sum, f) => sum + f.posture_score, 0) / expressionFrames.length * 100)
-                  }</strong>점으로, 전반적으로 <strong>바른 자세를 유지한 모습</strong>이 관찰되었습니다.
-                </p>
+            {expressionFrames.map((frame, index) => {
+              const postureScore = Math.round(frame.posture_score * 100);
+              const { time, face_detected, expression, gaze, head_movement, posture_stability } = frame;
 
-                <h4 className="feedback-heading">⏱️ 구간별 분석 결과</h4>
-                <ul className="feedback-text">
-                  {expressionFrames.map((frame, index) => {
-                    const postureScore = Math.round(frame.posture_score * 100);
-                    const { time, face_detected, expression, gaze } = frame;
+              let summary = `🕒 ${time} — `;
+              const details = [];
 
-                    return (
-                      <li key={index}>
-                        🕒 {time} —{" "}
-                        {face_detected ? (
-                          <>
-                            얼굴 인식 <strong>✅</strong>, 자세 <strong>{postureScore}점</strong>, 표정 <strong>{expression}</strong>, 시선 <strong>{gaze}</strong><br />
-                            → 집중도 높고 안정적인 인상을 주는 구간입니다.
-                          </>
-                        ) : (
-                          <>
-                            얼굴 인식 <strong>실패 ⚠️</strong>, 자세 <strong>{postureScore}점</strong><br />
-                            → 얼굴이 화면에 잘 보이지 않아 면접관과의 시선 교환이 어려웠을 수 있어요.
-                          </>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
-                <hr className="feedback-hr" />
-              </div>
-            )}
+              // 💥 얼굴 + 표정 둘 다 안 보일 경우
+              if (!face_detected && expression === "감정 없음") {
+                summary += `얼굴 및 표정 인식 <strong>실패 ⚠️</strong>. `;
+                if (postureScore >= 70) {
+                  details.push("자세는 어느 정도 안정적으로 유지되었지만, 비언어적 요소의 분석이 불가능해 아쉬움이 남습니다.");
+                } else {
+                  details.push("자세가 불안정하고 얼굴/표정이 인식되지 않아 전달력이 매우 낮았을 수 있습니다.");
+                }
+                details.push("면접관 입장에서는 시선/표정/태도를 파악하기 어려웠을 수 있습니다.");
+                return (
+                  <li key={index}>
+                    <div dangerouslySetInnerHTML={{ __html: summary + "→ " + details.join(" ") }} />
+                  </li>
+                );
+              }
+
+              // 🧠 얼굴 인식 실패만
+              if (!face_detected) {
+                summary += `얼굴 인식 <strong>실패 ⚠️</strong>. `;
+                details.push("해당 구간에서는 얼굴이 인식되지 않아 시선, 표정, 표정 분석이 제한됩니다.");
+
+                if (postureScore >= 80) {
+                  details.push("자세는 안정적으로 유지되어 있으나, 비언어적 전달력은 부족했을 수 있습니다.");
+                } else {
+                  details.push("자세까지 흐트러져 비언어적 신뢰도에 크게 영향을 주었을 수 있습니다.");
+                }
+                return (
+                  <li key={index}>
+                    <div dangerouslySetInnerHTML={{ __html: summary + "→ " + details.join(" ") }} />
+                  </li>
+                );
+              }
+
+              // ✅ 얼굴 인식 성공 시 요약
+              summary += `얼굴 인식 <strong>✅</strong>, 자세 <strong>${postureScore}점</strong>, 표정 <strong>${expression}</strong>, 시선 <strong>${gaze}</strong>.`;
+
+              // 🪑 자세 점수
+              if (postureScore >= 90) {
+                details.push("매우 바른 자세를 유지하여 안정감 있고 자신감 있는 인상을 주었습니다.");
+              } else if (postureScore >= 70) {
+                details.push("자세는 대체로 안정적이었지만 약간의 흐트러짐이 관찰되었습니다.");
+              } else if (postureScore >= 50) {
+                details.push("앉은 자세가 자주 흔들려 긴장되거나 불안한 인상을 줄 수 있습니다.");
+              } else {
+                details.push("자세가 불안정하여 면접관에게 불성실한 태도로 비칠 수 있습니다.");
+              }
+
+              // 👀 시선 분석
+              switch (gaze) {
+                case "정면 응시":
+                  details.push("시선을 잘 유지하여 집중력과 자신감을 드러냈습니다.");
+                  break;
+                case "시선 좌측":
+                  details.push("시선이 자주 좌측으로 흐트러져 긴장하거나 산만해 보일 수 있습니다.");
+                  break;
+                case "시선 우측":
+                  details.push("시선이 우측으로 흐트러져 전달력이 약하거나 불안정해 보일 수 있습니다.");
+                  break;
+                default:
+                  details.push("시선 분석이 불가능해 면접관과의 교감 여부를 파악하기 어렵습니다.");
+              }
+
+              // 😀 표정 분석
+              switch (expression) {
+                case "웃는 표정":
+                  details.push("밝은 표정으로 긍정적이고 열린 인상을 주었습니다.");
+                  break;
+                case "중립 표정":
+                  details.push("중립적인 표정이 유지되어 무난하지만 다소 딱딱한 인상도 줄 수 있습니다.");
+                  break;
+                default:
+                  details.push("표정이 인식되지 않거나 변화가 없어 감정 표현이 부족해 보일 수 있습니다.");
+              }
+
+              // 🧍 고개 움직임
+              if (head_movement === "고개 움직임 많음") {
+                details.push("고개를 자주 움직여 산만하거나 불안한 인상을 줄 수 있습니다.");
+              } else {
+                details.push("고개 움직임이 안정적으로 유지되었습니다.");
+              }
+
+              // 🔁 자세 흔들림
+              if (posture_stability === "자세 흔들림 감지") {
+                details.push("상체가 좌우로 자주 흔들려 불안정한 인상을 주었습니다.");
+              }
+
+              return (
+                <li key={index}>
+                  <div dangerouslySetInnerHTML={{ __html: summary + " → " + details.join(" ") }} />
+                </li>
+              );
+            })}
+
           </div>
         </div>
       </div>
