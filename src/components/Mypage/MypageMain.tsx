@@ -18,6 +18,10 @@ const MypageMain = () => {
   const handlePlusClick = () => {
     navigate('/mypage');
   };
+  
+  const handleRecommendClick = () => {
+    navigate('/recommend');
+  };
 
   useEffect(() => {
     fetch('http://localhost:5000/videos')
@@ -64,7 +68,9 @@ const MypageMain = () => {
         <div className="mypage-main">
           <div className="recommend-section">
             <span>관심분야 선택하고 기업 추천을 받아보세요.</span>
-            <button className="recommend-detail">상세보기</button>
+            <button className="recommend-detail" onClick={handleRecommendClick}>
+              상세보기
+            </button>
             <div className="toggle-container">
               <label className="switch">
                 <input type="checkbox" />
