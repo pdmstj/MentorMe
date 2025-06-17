@@ -22,7 +22,7 @@ function Header() {
 
       <nav className="nav-menu">
         <Link to="/interview-practice">면접 연습</Link>
-        <Link to="#">내 결과확인</Link>
+        <Link to="/record">내 결과확인</Link>
 
         {user ? (
           <div className="user-menu">
