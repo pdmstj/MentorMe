@@ -3,6 +3,7 @@ import { useNavigate, useLocation, Link } from 'react-router-dom';
 import './MypageMain.css';
 import { UserContext } from '../../contexts/UserContext';
 import logoImg from '../../image/mentorme_logo.png';
+import profileDefault from '../../image/ko.jpg'; // 기본 프로필 이미지 import
 import MypageTabs from '../../components/MypageTabs';
 
 const MypageMain = () => {
@@ -10,6 +11,7 @@ const MypageMain = () => {
   const location = useLocation();
   const { user } = useContext(UserContext);
   const [videos, setVideos] = useState<string[]>([]);
+  const [profileImage, setProfileImage] = useState<string>(profileDefault); // 프로필 이미지 상태 추가
 
   const handleSectionClick = (sectionId: string) => {
     navigate(`/mypage#${sectionId}`);
@@ -18,10 +20,23 @@ const MypageMain = () => {
   const handlePlusClick = () => {
     navigate('/mypage');
   };
-  
   const handleRecommendClick = () => {
     navigate('/recommend');
   };
+
+
+  // 로컬 스토리지에서 프로필 이미지 로드
+  useEffect(() => {
+    if (user && user.email) {
+      const storageKey = `profileImage_${user.email.replace(/[@.]/g, '_')}`;
+      const savedImage = localStorage.getItem(storageKey);
+      if (savedImage) {
+        setProfileImage(savedImage);
+      } else {
+        setProfileImage(profileDefault);
+      }
+    }
+  }, [user]);
 
   useEffect(() => {
     fetch('http://localhost:5000/videos')
@@ -44,11 +59,10 @@ const MypageMain = () => {
         </Link>
       </div>
 
-    <MypageTabs /> {/* ✅ 로고 아래, 사이드바 위쪽으로 탭 이동 */}
+      <MypageTabs />
 
       <div className="mypage-content">
         <div className="mypage-sidebar">
-          
           <div className="sidebar-title">마이페이지</div>
           <button className="recommend-msg" onClick={() => alert('추천 기능 준비 중!')}>
             기업 추천을 받을 수 있어요.
@@ -67,22 +81,34 @@ const MypageMain = () => {
 
         <div className="mypage-main">
           <div className="recommend-section">
-            <span>관심분야 선택하고 기업 추천을 받아보세요.</span>
-            <button className="recommend-detail" onClick={handleRecommendClick}>
-              상세보기
-            </button>
-            <div className="toggle-container">
-              <label className="switch">
-                <input type="checkbox" />
-                <span className="slider round"></span>
-              </label>
-              <span className="toggle-text">제안 받기</span>
-            </div>
+              <span>관심분야 선택하고 기업 추천을 받아보세요.</span>
+              <button className="recommend-detail" onClick={handleRecommendClick}>
+                상세보기
+              </button>
+              <div className="toggle-container">
+                <label className="switch">
+                  <input type="checkbox" />
+                  <span className="slider round"></span>
+                </label>
+                <span className="toggle-text">제안 받기</span>
+              </div>
           </div>
 
           <div className="profile-section">
             <div className="profile-info">
-              <div className="profile-img"></div>
+              {/* 프로필 이미지를 로컬 스토리지에서 가져온 이미지로 표시 */}
+              <div className="profile-img">
+                <img 
+                  src={profileImage} 
+                  alt="프로필" 
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    borderRadius: '50%'
+                  }}
+                />
+              </div>
               <div className="profile-text">
                 <div><strong>{user ? user.name : "로그인 필요"}</strong> <span className="required">*</span></div>
                 <div>

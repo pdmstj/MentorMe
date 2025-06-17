@@ -108,6 +108,13 @@ const Mypage = () => {
       if (!user || !user.email) return;
 
       try {
+        // 로컬 스토리지에서 프로필 이미지 먼저 로드
+        const storageKey = `profileImage_${user.email.replace(/[@.]/g, '_')}`;
+        const savedImage = localStorage.getItem(storageKey);
+        if (savedImage) {
+          setProfileImage(savedImage);
+        }
+
         // 이메일을 문서 ID로 사용 (특수문자 처리)
         const docId = user.email.replace(/[@.]/g, '_');
         const userDocRef = doc(db, "users", docId);
@@ -116,7 +123,7 @@ const Mypage = () => {
         if (userDoc.exists()) {
           const userData = userDoc.data();
           
-          // 기존 데이터가 있으면 state에 설정
+          // 기존 데이터가 있으면 state에 설정 (프로필 이미지는 제외)
           if (userData.jobs) setSelectedJobs(userData.jobs);
           if (userData.skills) setSelectedSkills(userData.skills);
           if (userData.customJobs) setCustomJobs(userData.customJobs);
@@ -139,7 +146,7 @@ const Mypage = () => {
           }
           if (userData.careerLevel) setCareerLevel(userData.careerLevel);
           if (userData.address) setAddress(userData.address);
-          if (userData.profileImage) setProfileImage(userData.profileImage);
+          // profileImage는 로컬 스토리지에서만 가져오므로 제외
         }
       } catch (error) {
         console.error("사용자 데이터 로드 실패:", error);
@@ -154,7 +161,14 @@ const Mypage = () => {
       const reader = new FileReader();
       reader.onload = (event) => {
         if (event.target && typeof event.target.result === 'string') {
-          setProfileImage(event.target.result);
+          const imageData = event.target.result;
+          setProfileImage(imageData);
+          
+          // 로컬 스토리지에 이미지 저장 (사용자별로)
+          if (user && user.email) {
+            const storageKey = `profileImage_${user.email.replace(/[@.]/g, '_')}`;
+            localStorage.setItem(storageKey, imageData);
+          }
         }
       };
       reader.readAsDataURL(e.target.files[0]);
@@ -328,7 +342,7 @@ const Mypage = () => {
         email: user.email || "",
         phone: user.phone || "",
         birth: user.birth || "",
-        profileImage,
+        // profileImage는 Firebase에 저장하지 않음 (로컬에만 저장)
         careerLevel,
         address,
         jobs: selectedJobs,
