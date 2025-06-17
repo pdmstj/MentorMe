@@ -194,13 +194,13 @@
   overflow-x: auto;
 }
 
-.feedback-frame-item {
-  margin-bottom: 1.5rem;
-  padding: 1rem;
-  background-color: #f9f9f9;
-  border-left: 4px solid #b3d4fc;
-  border-radius: 8px;
-  font-size: 1rem;
-  line-height: 1.6;
+.feedback-text p {
+  margin-bottom: 12px;
+  line-height: 1.7;
+}
+
+.feedback-text strong {
+  color: #222;
+  font-weight: bold;
 }
 

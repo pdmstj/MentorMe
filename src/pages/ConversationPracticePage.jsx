@@ -42,6 +42,7 @@ const SelfInterviewPracticeStyled = () => {
         const qs = await fetchQuestionsByCategory(category);
         if (!qs || qs.length === 0) {
           alert("해당 카테고리의 질문이 없습니다.");
+          return;
         }
         setQuestions(qs);
       } catch (err) {
@@ -51,39 +52,9 @@ const SelfInterviewPracticeStyled = () => {
     loadQuestions();
   }, [category]);
 
-  // 질문 TTS 읽기
   useEffect(() => {
     if (questions.length === 0) return;
-    if (loading) {
-      window.speechSynthesis.cancel();  // 분석 중이면 읽기 중단
-      return;
-    }
 
-    const speakQuestion = (text) => {
-      if (!window.speechSynthesis) return;
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'ko-KR';
-      window.speechSynthesis.speak(utterance);
-    };
-
-    speakQuestion(questions[questionIndex]);
-
-    const timer = setInterval(() => {
-      setQuestionIndex((prev) => {
-        const nextIndex = (prev + 1) % questions.length;
-        speakQuestion(questions[nextIndex]);
-        return nextIndex;
-      });
-    }, 30000);
-
-    return () => {
-      clearInterval(timer);
-      window.speechSynthesis.cancel();
-    };
-  }, [questions, questionIndex, loading]);
-
-  useEffect(() => {
     const startCameraAndRecording = async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
@@ -108,44 +79,42 @@ const SelfInterviewPracticeStyled = () => {
           formData.append('file', file);
 
           try {
-            // 1. 업로드
             const saveRes = await fetch('http://localhost:5000/upload', {
               method: 'POST',
               body: formData,
             });
-        
+
             if (!saveRes.ok) throw new Error("영상 저장 실패");
             const saveResult = await saveRes.json();
             const uploadedFilename = saveResult.path.split("/").pop();
-        
-            // 2. 분석 요청
+
             const analyzeRes = await fetch('http://localhost:5001/analyze', {
               method: 'POST',
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ filename: uploadedFilename }),
             });
-        
+
             if (!analyzeRes.ok) throw new Error("분석 요청 실패");
             const analyzeResult = await analyzeRes.json();
-        
-            // 3. 이동
+
             const username = localStorage.getItem("username");
             navigate('/feedback', {
               state: {
                 videoUrl,
                 sttText: analyzeResult.text,
-                expressionResult: { frames: analyzeResult.frames }, 
+                expressionResult: { frames: analyzeResult.frames },
                 type: 'self',
-                user: username, 
+                user: username,
+                question: questions[questionIndex],
               },
             });
-        
+
           } catch (err) {
             console.error("분석 오류:", err);
             alert("분석 중 오류 발생 ❌");
             setLoading(false);
           }
-        
+
           stream.getTracks().forEach((track) => track.stop());
         };
 
@@ -158,7 +127,34 @@ const SelfInterviewPracticeStyled = () => {
     };
 
     startCameraAndRecording();
-  }, []);
+  }, [questions]);
+
+  useEffect(() => {
+    if (questions.length === 0 || loading) return;
+
+    const speakQuestion = (text) => {
+      if (!window.speechSynthesis) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'ko-KR';
+      window.speechSynthesis.speak(utterance);
+    };
+
+    speakQuestion(questions[questionIndex]);
+
+    const timer = setInterval(() => {
+      setQuestionIndex((prev) => {
+        const nextIndex = (prev + 1) % questions.length;
+        speakQuestion(questions[nextIndex]);
+        return nextIndex;
+      });
+    }, 20000);
+
+    return () => {
+      clearInterval(timer);
+      window.speechSynthesis.cancel();
+    };
+  }, [questions, questionIndex, loading]);
 
   useEffect(() => {
     if (!recording) return;

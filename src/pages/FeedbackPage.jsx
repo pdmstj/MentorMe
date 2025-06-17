@@ -12,6 +12,7 @@ const FeedbackPage = () => {
   const videoUrl = location.state?.videoUrl;
   const sttText = location.state?.sttText;
   const type = location.state?.type;
+  const question = location.state?.question || "면접 질문 정보가 없습니다.";
   const expressionResult = location.state?.expressionResult || {};
   const expressionFrames = expressionResult?.frames || [];
   const [feedbackSummary, setFeedbackSummary] = useState(null);
@@ -63,6 +64,7 @@ const FeedbackPage = () => {
       formData.append('sttText', sttText || '');
       formData.append('expressionResult', JSON.stringify(expressionResult || {}));
       formData.append('gptFeedback', JSON.stringify(feedbackSummary || {}));
+      formData.append('question', question); 
       formData.append('user', JSON.stringify(user));
 
       const response = await fetch('http://localhost:5002/save-feedback', {
@@ -123,6 +125,12 @@ const FeedbackPage = () => {
             <h3 className="box-title">AI 분석 기반 피드백</h3>
 
             <div className="feedback-item">
+              <h4 className="feedback-heading">❓ 면접 질문</h4>
+              <p className="feedback-text">{question}</p>
+              <hr className="feedback-hr" />
+            </div>
+
+            <div className="feedback-item">
               <h4 className="feedback-heading">📝 인식된 답변</h4>
               <p className="feedback-text">{sttText || "분석된 텍스트가 없습니다."}</p>
               <hr className="feedback-hr" />
@@ -158,91 +166,66 @@ const FeedbackPage = () => {
               </>
             )}
 
-            {/* 📸 표정/자세 분석 결과 */}
             {expressionFrames.length > 0 && (
               <div className="feedback-item">
-                <h4 className="feedback-heading">📸 표정 및 자세 분석 결과</h4>
-                <ul className="feedback-text">
-                  {expressionFrames.map((frame, index) => {
-                    const postureScore = Math.round(frame.posture_score * 100);
-                    const { time, face_detected, expression, gaze, head_movement, posture_stability } = frame;
+                <h4 className="feedback-heading">📸 표정 및 자세 종합 피드백</h4>
+                <div className="feedback-text">
+                  {
+                    (() => {
+                      let totalPosture = 0;
+                      let count = expressionFrames.length;
+                      let goodPosture = 0;
+                      let gazeFront = 0;
+                      let smiles = 0;
+                      let faceDetectFail = 0;
 
-                    let summary = `🕒 ${time} — `;
-                    const details = [];
+                      expressionFrames.forEach(f => {
+                        totalPosture += f.posture_score || 0;
+                        if ((f.posture_score || 0) > 0.8) goodPosture++;
+                        if (f.gaze === "정면 응시") gazeFront++;
+                        if (f.expression === "웃는 표정") smiles++;
+                        if (!f.face_detected) faceDetectFail++;
+                      });
 
-                    if (!face_detected && expression === "감정 없음") {
-                      summary += `얼굴 및 표정 인식 <strong>실패 ⚠️</strong>. `;
-                      if (postureScore >= 70) {
-                        details.push("자세는 어느 정도 안정적으로 유지되었지만, 비언어적 요소의 분석이 불가능해 아쉬움이 남습니다.");
-                      } else {
-                        details.push("자세가 불안정하고 얼굴/표정이 인식되지 않아 전달력이 매우 낮았을 수 있습니다.");
-                      }
-                      details.push("면접관 입장에서는 시선/표정/태도를 파악하기 어려웠을 수 있습니다.");
-                    } else if (!face_detected) {
-                      summary += `얼굴 인식 <strong>실패 ⚠️</strong>. `;
-                      details.push("해당 구간에서는 얼굴이 인식되지 않아 시선, 표정, 표정 분석이 제한됩니다.");
+                      const avgPosture = totalPosture / count;
+                      const avgScore = Math.round(avgPosture * 100);
 
-                      if (postureScore >= 80) {
-                        details.push("자세는 안정적으로 유지되어 있으나, 비언어적 전달력은 부족했을 수 있습니다.");
-                      } else {
-                        details.push("자세까지 흐트러져 비언어적 신뢰도에 크게 영향을 주었을 수 있습니다.");
-                      }
-                    } else {
-                      summary += `얼굴 인식 <strong>✅</strong>, 자세 <strong>${postureScore}점</strong>, 표정 <strong>${expression}</strong>, 시선 <strong>${gaze}</strong>.`;
+                      return (
+                        <>
+                          <p><strong>✔️ 평균 자세 점수:</strong><br /> {avgScore}점</p>
 
-                      if (postureScore >= 90) {
-                        details.push("매우 바른 자세를 유지하여 안정감 있고 자신감 있는 인상을 주었습니다.");
-                      } else if (postureScore >= 70) {
-                        details.push("자세는 대체로 안정적이었지만 약간의 흐트러짐이 관찰되었습니다.");
-                      } else if (postureScore >= 50) {
-                        details.push("앉은 자세가 자주 흔들려 긴장되거나 불안한 인상을 줄 수 있습니다.");
-                      } else {
-                        details.push("자세가 불안정하여 면접관에게 불성실한 태도로 비칠 수 있습니다.");
-                      }
+                          <p>
+                            <strong>📌 자세 요약:</strong><br />
+                            {goodPosture >= count * 0.7
+                              ? "대체로 바른 자세를 유지하였습니다."
+                              : "자세가 불안정한 구간이 자주 발견되었습니다."}
+                          </p>
 
-                      switch (gaze) {
-                        case "정면 응시":
-                          details.push("시선을 잘 유지하여 집중력과 자신감을 드러냈습니다.");
-                          break;
-                        case "시선 좌측":
-                          details.push("시선이 자주 좌측으로 흐트러져 긴장하거나 산만해 보일 수 있습니다.");
-                          break;
-                        case "시선 우측":
-                          details.push("시선이 우측으로 흐트러져 전달력이 약하거나 불안정해 보일 수 있습니다.");
-                          break;
-                        default:
-                          details.push("시선 분석이 불가능해 면접관과의 교감 여부를 파악하기 어렵습니다.");
-                      }
+                          <p>
+                            <strong>👀 시선 분석:</strong><br />
+                            {gazeFront >= count * 0.7
+                              ? "시선을 정면에 잘 유지하였습니다."
+                              : "시선이 자주 흐트러졌습니다."}
+                          </p>
 
-                      switch (expression) {
-                        case "웃는 표정":
-                          details.push("밝은 표정으로 긍정적이고 열린 인상을 주었습니다.");
-                          break;
-                        case "중립 표정":
-                          details.push("중립적인 표정이 유지되어 무난하지만 다소 딱딱한 인상도 줄 수 있습니다.");
-                          break;
-                        default:
-                          details.push("표정이 인식되지 않거나 변화가 없어 감정 표현이 부족해 보일 수 있습니다.");
-                      }
+                          <p>
+                            <strong>😊 표정 분석:</strong><br />
+                            {smiles > 0
+                              ? "밝은 표정을 보여준 구간도 확인되었습니다."
+                              : "표정 변화가 거의 없거나 중립적인 인상이 많았습니다."}
+                          </p>
 
-                      if (head_movement === "고개 움직임 많음") {
-                        details.push("고개를 자주 움직여 산만하거나 불안한 인상을 줄 수 있습니다.");
-                      } else {
-                        details.push("고개 움직임이 안정적으로 유지되었습니다.");
-                      }
-
-                      if (posture_stability === "자세 흔들림 감지") {
-                        details.push("상체가 좌우로 자주 흔들려 불안정한 인상을 주었습니다.");
-                      }
-                    }
-
-                    return (
-                      <li key={index} className="feedback-frame-item">
-                        <div dangerouslySetInnerHTML={{ __html: summary + " → " + details.join(" ") }} />
-                      </li>
-                    );
-                  })}
-                </ul>
+                          {faceDetectFail > 0 && (
+                            <p>
+                              <strong>⚠️ 얼굴 인식 실패:</strong><br />
+                              얼굴 인식에 실패한 구간이 <strong>{faceDetectFail}개</strong> 존재하여 일부 분석이 누락되었을 수 있습니다.
+                            </p>
+                          )}
+                        </>
+                      );
+                    })()
+                  }
+                </div>
               </div>
             )}
 

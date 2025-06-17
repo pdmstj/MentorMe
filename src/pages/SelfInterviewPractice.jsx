@@ -50,29 +50,8 @@ const SelfInterviewPractice = () => {
   }, [category]);
 
   useEffect(() => {
-    if (loading) {
-      window.speechSynthesis.cancel();
-      return;
-    }
     if (questions.length === 0) return;
-    const questionText = questions[questionIndex];
-    if (!questionText) return;
 
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(questionText);
-    utterance.lang = 'ko-KR';
-    window.speechSynthesis.speak(utterance);
-  }, [questionIndex, questions, loading]);
-
-  useEffect(() => {
-    if (questions.length === 0) return;
-    const timer = setInterval(() => {
-      setQuestionIndex((prev) => (prev + 1) % questions.length);
-    }, 30000);
-    return () => clearInterval(timer);
-  }, [questions]);
-
-  useEffect(() => {
     const startCameraAndRecording = async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
@@ -134,6 +113,7 @@ const SelfInterviewPractice = () => {
                 type: 'self',
                 user: username,
                 savedPath: saveResult.path,
+                question: questions[questionIndex],
                 gptFeedback
               }
             });
@@ -154,7 +134,30 @@ const SelfInterviewPractice = () => {
     };
 
     startCameraAndRecording();
-  }, []);
+  }, [questions]);
+
+  useEffect(() => {
+    if (loading) {
+      window.speechSynthesis.cancel();
+      return;
+    }
+    if (questions.length === 0) return;
+    const questionText = questions[questionIndex];
+    if (!questionText) return;
+
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(questionText);
+    utterance.lang = 'ko-KR';
+    window.speechSynthesis.speak(utterance);
+  }, [questionIndex, questions, loading]);
+
+  useEffect(() => {
+    if (questions.length === 0) return;
+    const timer = setInterval(() => {
+      setQuestionIndex((prev) => (prev + 1) % questions.length);
+    }, 20000);
+    return () => clearInterval(timer);
+  }, [questions]);
 
   useEffect(() => {
     if (!recording) return;
