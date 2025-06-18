@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import '../pages/ConversationPracticePage.css';
 import frame34 from "../image/Frame 34.svg";
-import ai_men from "../image/aimento.png";
+import ai_men from "../image/mento.png";
 import logoImg from "../image/mentorme_logo.png";
 import { fetchQuestionsByCategory } from '../services/questionService';
 
