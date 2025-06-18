@@ -1,0 +1,36 @@
+.mypage-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center; /* 세로 중앙 정렬 */
+  padding: 0.5rem 2rem;
+  font-family: "Pretendard", sans-serif;
+  font-size: 14px;
+  position: relative;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  margin-top: 5px;
+}
+
+.logo-img {
+  height: auto;
+  width: 200px;
+  object-fit: contain;
+}
+
+.exit-button {
+  background-color: #638eff;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 9999px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.exit-button:hover {
+  background-color: #4a75e5;
+}

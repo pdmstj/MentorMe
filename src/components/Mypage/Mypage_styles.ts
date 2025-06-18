@@ -9,15 +9,14 @@ export const Container = styled.div`
 `;
 
 export const FixedImage = styled.img`
-  position: relative;
-  top: 10px;
-  left: 20px;
-  width: 180px;
-  height: auto;
-  z-index: 999;
-  pointer-events: none;
+position: relative;
+top: 30px;
+left: 45px;
+width: 200px;
+height: auto;
+z-index: 999;
+margin-bottom: 42px;
 `;
-
 
 export const Section = styled.section`
   margin: 5rem 0; 

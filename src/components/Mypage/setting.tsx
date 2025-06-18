@@ -34,7 +34,6 @@ const SettingPage: React.FC = () => {
             </Link>
             <MypageTabs />
             <Container>
-
                 {/* 알림 설정 */}
                 <Section>
                     <Title>알림 설정</Title>

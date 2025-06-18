@@ -15,6 +15,7 @@ import MypageTabs from "../../components/MypageTabs";
 import logoImg from "../../image/Mentorme.png";
 import { useUserContext } from "../../contexts/UserContext"; // ✅ 사용자 이름 사용
 
+
 const Record = () => {
   const [records, setRecords] = useState([]);
   const { user } = useUserContext();
@@ -42,15 +43,11 @@ const Record = () => {
     <Link to="/">
           <FixedLogo src={logoImg} alt="로고" />
         </Link>
-
-      <PageWrapper>
-              {/* 🔷 로고 + 탭 묶어서 상단 왼쪽 정렬 */}
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", padding: "20px 40px 0" }}>
-    
-        <div style={{ marginTop: "10px" }}>
+        <div>
           <MypageTabs />
         </div>
-      </div>
+      <PageWrapper>
+      
         <SectionBox>
           <SubTitle>최근 면접 기록</SubTitle>
           {records.length > 0 ? (

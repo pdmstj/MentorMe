@@ -26,8 +26,9 @@ export const Container = styled.div`
 `;
 
 export const StyledSlider = styled(Slider)`
+  position: relative;
   width: 100%;
-  margin: 50px 0;
+  margin: 30px 0;
 
   .slick-track {
     display: flex !important;
@@ -55,7 +56,6 @@ export const StyledSlider = styled(Slider)`
 export const Title = styled.h2`
   font-size: 30px;
   font-weight: bold;
-  margin-top: 0;
   color: #222;
   text-align: center;
 `;
@@ -79,7 +79,7 @@ export const CardList = styled.div`
 
 export const Card = styled.div`
   width: 250px !important;
-  height: 420px;
+  height: 410px;
   background: #fff;
   border-radius: 16px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
@@ -207,5 +207,24 @@ export const ArrowButton = styled.button`
   &:disabled {
     opacity: 0.3;
     cursor: default;
+  }
+`;
+
+export const ExitButton = styled.button`
+  position: absolute;
+  right: 30px;
+  top: 93%;
+  transform: translateY(-50%);
+  background-color: #638eff;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 9999px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+  background-color: #4a75e5;
   }
 `;

@@ -5,6 +5,7 @@ import { UserContext } from '../../contexts/UserContext';
 import logoImg from '../../image/Mentorme.png';
 import profileDefault from '../../image/ko.jpg'; // 기본 프로필 이미지 import
 import MypageTabs from '../../components/MypageTabs';
+import MyPageHeader from '../MyPageHeader';
 
 const MypageMain = () => {
   const navigate = useNavigate();
@@ -54,12 +55,11 @@ const MypageMain = () => {
   return (
     <div className="mypage-container">
       <div className="mypage-header">
-        <Link to="/" className="logo">
+        <Link to="/">
           <img src={logoImg} alt="로고" className="logo-img" />
         </Link>
+        <MypageTabs />
       </div>
-
-      <MypageTabs />
 
       <div className="mypage-content">
         <div className="mypage-sidebar">

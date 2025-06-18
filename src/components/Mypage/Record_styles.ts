@@ -3,7 +3,6 @@ import styled from "styled-components";
 export const PageWrapper = styled.div`
   max-width: 1000px;
   margin: 0 auto;
-  padding: 2rem;
   background-color: #ffffff;
   font-family: 'Pretendard', sans-serif;
 `;
@@ -79,10 +78,10 @@ export const LogoText = styled.span`
 
 export const FixedLogo = styled.img`
 position: relative;
-top: 10px;
-left: 20px;
+top: 30px;
+left: 45px;
 width: 200px;
 height: auto;
 z-index: 999;
-margin-bottom: 1.5rem;
+margin-bottom: 43px;
 `;

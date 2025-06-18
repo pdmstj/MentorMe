@@ -22,7 +22,7 @@ import RecommendModal from './components/Recommend/RecommendModal';
 import RecommendInterestPage from './pages/RecommendInterestPage'; 
 
 // 마이페이지 메인 import
-import MypageMain from './components/Mypage/MypageMain'; 
+import MypageMain from './components/Mypage/MypageMain.tsx';
 // 마이페이지 상세 (입력 폼) import
 import Mypage from './components/Mypage/Mypage'; 
 

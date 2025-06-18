@@ -1,5 +1,7 @@
 .main-header {
   display: flex;
+  margin-top: 25px;
+  margin-left: 10px;
   justify-content: space-between;
   padding: 0.5rem 2rem;
   font-family: "Pretendard", sans-serif;
@@ -8,14 +10,11 @@
 
 .logo {
   margin-top: 5px;
-  width: 100px;
-  height: 30px;
 }
 
 .logo-img {
-  height: 25px; 
-  width: auto;
-  object-fit: contain;
+  height: auto; 
+  width: 200px;
 }
 
 .logout-btn {

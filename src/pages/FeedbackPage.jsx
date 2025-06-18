@@ -213,7 +213,7 @@ const FeedbackPage = () => {
 
             {expressionFrames.length > 0 && (
               <div className="feedback-item">
-                <h4 className="feedback-heading">📸 표정 및 자세 종합 피드백</h4>
+                <h4 className="feedback-heading">📸 표정 및 자세 종합 피드백</h4><br></br>
                 <div className="feedback-text">
                   {
                     (() => {
@@ -263,6 +263,7 @@ const FeedbackPage = () => {
                     })()
                   }
                 </div>
+                <hr className="feedback-hr" />
               </div>
             )}
           </div>

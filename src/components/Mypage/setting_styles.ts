@@ -3,20 +3,19 @@ import styled from 'styled-components';
 export const Container = styled.div`
   max-width: 1000px;
   margin: 0 auto;
-  padding: 2rem;
   font-family: 'Pretendard', sans-serif;
   font-size: 1rem;
   color: #333;
 `;
 
 export const FixedImage = styled.img`
-  position: relative;
-  top: 10px;
-  left: 20px;
-  width: 200px;
-  height: auto;
-  z-index: 999;
-  margin-bottom: 1.5rem;
+position: relative;
+top: 30px;
+left: 45px;
+width: 200px;
+height: auto;
+z-index: 999;
+margin-bottom: 42px;
 `;
 
 export const Section = styled.section`
@@ -27,7 +26,7 @@ export const Section = styled.section`
 `;
 
 export const Title = styled.h3`
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   font-weight: bold;
   margin-bottom: 1.2rem;
 `;

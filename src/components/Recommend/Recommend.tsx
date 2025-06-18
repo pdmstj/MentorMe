@@ -1,9 +1,10 @@
-import React, { useRef, useEffect, useState, useMemo } from "react";
+import React, { useRef, useEffect, useState, useMemo} from "react";
 import Slider from "react-slick";
 import { auth } from "../../firebase";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import companiesRaw from "../../data/companies.json";
+import { useNavigate } from "react-router-dom"; 
 
 import {
   Container,
@@ -22,7 +23,8 @@ import {
   InfoText,
   Highlight,
   StyledSlider,
-  ArrowButton
+  ArrowButton,
+  ExitButton
 } from "./Recommend_styles";
 
 interface CompanyType {
@@ -80,6 +82,7 @@ const Recommend: React.FC = () => {
   const [userJobCategories, setUserJobCategories] = useState<string[]>([]);
   const [filteredCompanies, setFilteredCompanies] = useState<CompanyType[]>([]);
   const db = getFirestore();
+  const navigate = useNavigate(); 
 
   const allCompanies: CompanyType[] = useMemo(() => {
     const companiesData = companiesRaw as Record<string, CompanyType[]>;
@@ -180,7 +183,7 @@ const Recommend: React.FC = () => {
           )}
         </StyledSlider>
       </CardArea>
-
+      <ExitButton onClick={() => navigate("/")}>나가기</ExitButton>
       <InfoText>
         결과는 <Highlight>[마이페이지&gt;기업 추천]</Highlight>에서 다시 확인할 수 있어요
       </InfoText>

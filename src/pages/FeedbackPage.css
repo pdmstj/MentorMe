@@ -1,13 +1,13 @@
 .feedback-wrapper {
-  width: 720px;
   width: 80%;
   margin: 0 auto;
-  padding: 0.5rem 0.5rem; /* 위 아래 패딩 줄임 */
+  padding: 0.5rem 0.5rem;
 }
 
 .box-container {
   display: flex;
   flex-direction: row;
+  height: 60%;
   justify-content: space-between;
   background-color: #fff;
   border-radius: 12px;
@@ -52,19 +52,21 @@
 .feedback-box {
   flex: 1;
   border-left: 1px solid #F1F1F1;
-  padding-left: 0.75rem; /* 왼쪽 여백 줄임 */
+  padding-left: 0.75rem;
+  padding-right: 1rem;
+  padding-top: 0.5rem;         /* ✅ 위 여백 조절 */
+  padding-bottom: 1.25rem;     /* ✅ 아래 여백 추가 */
+
   display: flex;
   flex-direction: column;
-  gap: 0.5rem; /* 내부 간격 줄임 */
-  max-height: 600px;     /* 원하는 높이 제한 */
-  overflow-y: auto;      /* 내용이 넘치면 세로 스크롤 */
-  padding-right: 1rem;   /* 스크롤과 겹치지 않도록 */
-  
-    /* ✅ 스크롤바 스타일 (선택) */
+  gap: 0.5rem;
+  height: 470px;
+  overflow-y: auto;
+
   scrollbar-width: thin;
   scrollbar-color: #ccc #f1f1f1;
-  
 }
+
 
 .box-title {
   font-size: 1rem; 
@@ -83,12 +85,12 @@
 
 .feedback-text {
   background-color: #f5f5f5;
-  padding: 3px; /* 패딩 축소 */
+  padding: 10px 14px; /* 패딩 축소 */
+  margin-left: 5px;
   font-size: 0.85rem; /* 글자 크기 축소 */
   border-radius: 6px;
-  line-height: 1.3; /* 줄 간격 줄임 */
+  line-height: 1.6; /* 줄 간격 줄임 */
   list-style: none; 
-
 }
 
 .feedback-hr {
@@ -155,7 +157,7 @@
 }
 
 .recheck-msg {
-  margin-top: 5px;
+  margin-top: 25px;
   font-size: 12.5px;
   color: #666;
   text-align: center;

@@ -92,6 +92,7 @@ function MicCameraCheck() {
           <div className="question-section">
             <span className="question-tag">모의 면접을 위해 마이크와 카메라를 확인 해주세요.</span>
             <p className="question-text">마이크와 카메라 모두 켜져 있어야 원활한 모의 면접과 AI 피드백 결과를 받아 보실 수 있습니다.</p>
+            <p className="question-text">질문은 20초에 한 번씩 바뀝니다.</p>
           </div>
         </div>
 
