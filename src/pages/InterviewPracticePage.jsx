@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import '../pages/InterviewPracticePage.css';
 import Header from '../components/header';
 import frame34 from "../image/Frame 34.svg";
+import process from "../image/process.png";
+import selfprocess from "../image/selfprocess.png";
 
 export default function InterviewPracticePage() {
   const [activeTab, setActiveTab] = useState('뷰인터 시작');
@@ -32,8 +34,7 @@ export default function InterviewPracticePage() {
                 <img className="img" alt="Frame" src={frame34} />
                 <p className="info-title">면접 연습 진행 안내</p>
               </div>
-              <p>1. 마이크 점검 → 2. 역할 선택 → 3. 연습 시작</p>
-              <p>4. 연습 종료 → 5. 결과 피드백 확인</p>
+              <img src={process} alt="과정 안내" className='process'/>
             </div>
             <button className="button" onClick={() => handleClick('대화형')}>연습하기</button>
           </div>
@@ -52,8 +53,7 @@ export default function InterviewPracticePage() {
                 <img className="img" alt="Frame" src={frame34} />
                 <p className="info-title">면접 연습 진행 안내</p>
               </div>
-              <p>1. 마이크 점검 → 2. 역할 선택 → 3. 연습 시작</p>
-              <p>4. 연습 종료 → 5. 결과 피드백 확인</p>
+              <img src={selfprocess} alt="과정 안내" className='process'/>
             </div>
             <button className="button" onClick={() => handleClick('셀프')}>연습하기</button>
           </div>

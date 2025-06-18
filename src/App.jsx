@@ -10,6 +10,8 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import SettingPage from './components/Mypage/setting';
 import Record from './components/Mypage/Record';
+import FeedbackDetailPage from './pages/FeedbackDetailPage'; // ✅ 상세 피드백 페이지
+
 
 
 // Context 추가
@@ -55,13 +57,16 @@ const App = () => {
           <Route path="/mypage-main" element={<MypageMain />} />
           <Route path="/mypage" element={<Mypage />} />
           <Route path="/setting" element={<SettingPage />} />   
-          <Route path="/record" element={<Record />} />   
+          <Route path="/record" element={<Record />} />  
+          <Route path="/record/:filename" element={<FeedbackDetailPage />} /> 
 
           {/* 회사 추천 */}
           <Route path="/recommend" element={<Recommend />} />
         </Routes>
       </Router>
     </UserProvider>
+
+          
   );
 };
 

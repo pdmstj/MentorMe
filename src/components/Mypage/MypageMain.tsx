@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import './MypageMain.css';
 import { UserContext } from '../../contexts/UserContext';
-import logoImg from '../../image/mentorme_logo.png';
+import logoImg from '../../image/Mentorme.png';
 import profileDefault from '../../image/ko.jpg'; // 기본 프로필 이미지 import
 import MypageTabs from '../../components/MypageTabs';
 

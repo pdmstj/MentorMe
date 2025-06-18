@@ -216,16 +216,14 @@ input:checked + .slider:before {
 }
 
 .logo {
-  margin-top: 5px;
-  width: 100px;
-  height: 30px;
+  position: relative;
+  margin-bottom: 1.5rem;
 }
 
 /* 로고 이미지 크기 증가 */
 .logo-img {
-  height: 30px;
-  width: auto;
-  object-fit: contain;
+  width: 200px;
+  height: auto;
 }
 
 /* 탭 공통 스타일 - 왼쪽 여백 제거 */

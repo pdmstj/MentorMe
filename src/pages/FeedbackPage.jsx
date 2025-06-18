@@ -18,9 +18,11 @@ const FeedbackPage = () => {
   const [feedbackSummary, setFeedbackSummary] = useState(null);
   const [feedbackError, setFeedbackError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [saved, setSaved] = useState(false);
   const { user } = useUserContext();
   const username = user?.name || "사용자";
 
+  // GPT 피드백 요청
   useEffect(() => {
     const fetchGPTFeedback = async () => {
       try {
@@ -48,6 +50,47 @@ const FeedbackPage = () => {
     else setLoading(false);
   }, [sttText, type]);
 
+  // 자동 저장
+  useEffect(() => {
+    const autoSave = async () => {
+      if (!videoUrl || !sttText || !feedbackSummary || !expressionResult || saved) return;
+
+      try {
+        const res = await fetch(videoUrl);
+        const videoBlob = await res.blob();
+        const videoFile = new File([videoBlob], 'feedback_video.webm', { type: 'video/webm' });
+
+        const formData = new FormData();
+        formData.append('video', videoFile);
+        formData.append('sttText', sttText);
+        formData.append('expressionResult', JSON.stringify(expressionResult));
+        formData.append('gptFeedback', JSON.stringify(feedbackSummary));
+        formData.append('question', question);
+        formData.append('type', type);
+        formData.append('timestamp', new Date().toISOString());
+        formData.append('user', username);
+        formData.append('video_path', videoUrl); // ✅ 추가됨
+
+        const response = await fetch('http://localhost:5002/save-feedback', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (response.ok) {
+          console.log("✅ 자동 저장 완료");
+          setSaved(true);
+        } else {
+          throw new Error("서버 오류 발생");
+        }
+      } catch (err) {
+        console.error("❌ 자동 저장 실패:", err);
+      }
+    };
+
+    if (!loading) autoSave();
+  }, [loading, videoUrl, sttText, feedbackSummary, expressionResult, saved, username, question, type]);
+
+  // 수동 저장
   const handleSave = async () => {
     if (!videoUrl) {
       alert("저장할 영상이 없습니다.");
@@ -64,8 +107,11 @@ const FeedbackPage = () => {
       formData.append('sttText', sttText || '');
       formData.append('expressionResult', JSON.stringify(expressionResult || {}));
       formData.append('gptFeedback', JSON.stringify(feedbackSummary || {}));
-      formData.append('question', question); 
-      formData.append('user', JSON.stringify(user));
+      formData.append('question', question);
+      formData.append('type', type);
+      formData.append('timestamp', new Date().toISOString());
+      formData.append('user', username);
+      formData.append('video_path', videoUrl); // ✅ 추가됨
 
       const response = await fetch('http://localhost:5002/save-feedback', {
         method: 'POST',
@@ -106,7 +152,6 @@ const FeedbackPage = () => {
       <div className="feedback-wrapper">
         <h2 className="feedback-title">{username} 님의 면접 피드백이 도착했어요!</h2>
         <div className="box-container">
-
           <div className="interview-section">
             <div className="interview-header">
               <img src={feedbackImg} alt="icon" />
@@ -193,31 +238,23 @@ const FeedbackPage = () => {
                       return (
                         <>
                           <p><strong>✔️ 평균 자세 점수:</strong><br /> {avgScore}점</p>
-
-                          <p>
-                            <strong>📌 자세 요약:</strong><br />
+                          <p><strong>📌 자세 요약:</strong><br />
                             {goodPosture >= count * 0.7
                               ? "대체로 바른 자세를 유지하였습니다."
                               : "자세가 불안정한 구간이 자주 발견되었습니다."}
                           </p>
-
-                          <p>
-                            <strong>👀 시선 분석:</strong><br />
+                          <p><strong>👀 시선 분석:</strong><br />
                             {gazeFront >= count * 0.7
                               ? "시선을 정면에 잘 유지하였습니다."
                               : "시선이 자주 흐트러졌습니다."}
                           </p>
-
-                          <p>
-                            <strong>😊 표정 분석:</strong><br />
+                          <p><strong>😊 표정 분석:</strong><br />
                             {smiles > 0
                               ? "밝은 표정을 보여준 구간도 확인되었습니다."
                               : "표정 변화가 거의 없거나 중립적인 인상이 많았습니다."}
                           </p>
-
                           {faceDetectFail > 0 && (
-                            <p>
-                              <strong>⚠️ 얼굴 인식 실패:</strong><br />
+                            <p><strong>⚠️ 얼굴 인식 실패:</strong><br />
                               얼굴 인식에 실패한 구간이 <strong>{faceDetectFail}개</strong> 존재하여 일부 분석이 누락되었을 수 있습니다.
                             </p>
                           )}
@@ -228,18 +265,11 @@ const FeedbackPage = () => {
                 </div>
               </div>
             )}
-
-
           </div>
         </div>
       </div>
 
       <p className="recheck-msg">결과는 <a href="/mypage">마이페이지&gt;최근 면접 보기</a> 에서 다시 확인할 수 있어요</p>
-
-      <div className="button-group">
-        <button className="btn" onClick={handleSave}>저장</button>
-        <button className="btn">삭제</button>
-      </div>
     </>
   );
 };

@@ -16,7 +16,6 @@ export const FixedImage = styled.img`
   width: 200px;
   height: auto;
   z-index: 999;
-  pointer-events: none;
   margin-bottom: 1.5rem;
 `;
 
